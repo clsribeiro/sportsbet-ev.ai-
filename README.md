@@ -80,3 +80,29 @@ O projeto encontra-se na fase inicial de desenvolvimento. A estrutura base do ba
     A interface estará acessível em `http://localhost:5173` e `http://SEU_IP_LOCAL:5173` (ou a porta indicada pelo Vite).
 
 ## 📂 Estrutura de Diretórios (Simplificada)
+```
+sportsbet-ev.ai-/
+├── backend/        # Código da API FastAPI (Python)
+│   ├── venv/
+│   ├── main.py
+│   └── .gitignore
+├── frontend/       # Código da Interface React (Vite)
+│   └── client/
+│       ├── public/
+│       ├── src/
+│       ├── package.json
+│       └── .gitignore
+├── .git/
+└── README.md       # Este arquivo
+```
+## 🛣️ Próximos Passos
+
+* Criação do arquivo `requirements.txt` para o backend.
+* Implementação do Docker para ambiente de desenvolvimento e produção.
+* Design e implementação do esquema do banco de dados PostgreSQL.
+* Integração com as primeiras APIs esportivas.
+* Desenvolvimento dos módulos de Destaques Diários e Análise Preditiva.
+
+---
+
+_Este projeto é um trabalho em desenvolvimento._
