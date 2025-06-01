@@ -1,0 +1,62 @@
+# Environment variables
+.env
+.env.*
+!/.env.example # Se você criar um exemplo de .env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+.installed.cfg
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+instance/
+.webassets-cache
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+celerybeat-schedule
+celerybeat.pid
+*.sage.py
+profile_default/
+ipython_config.py
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+cython_debug/
+
+# Virtualenv
+venv/
+.venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Node / Frontend
+frontend/client/node_modules/
+frontend/client/dist/
+frontend/client/.vite/
+# ... (outros arquivos específicos do frontend que o .gitignore interno do Vite já pode cobrir)
+
+# IDE / Editor specific
+.vscode/
+.idea/
+*.swp
+*~
