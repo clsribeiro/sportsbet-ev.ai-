@@ -1,0 +1,19 @@
+#version: '3.8' # Especifica a versão da sintaxe do Docker Compose
+
+services:
+  db:
+    image: postgres:16-alpine # Imagem oficial do PostgreSQL, versão 16, variante Alpine (menor)
+    container_name: sportsbet_db # Nome do nosso contêiner
+    restart: unless-stopped # Reinicia o contêiner a menos que seja parado manualmente
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres_dev} # Usuário do banco de dados
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-StrongDevPassword123!} # Senha do banco de dados
+      POSTGRES_DB: ${DB_NAME:-sportsbet_dev} # Nome do banco de dados
+    ports:
+      - "5432:5432" # Mapeia a porta 5432 do seu Debian para a porta 5432 do contêiner
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persiste os dados do banco
+
+volumes:
+  postgres_data: # Define um volume nomeado para persistir os dados do PostgreSQL
+    driver: local

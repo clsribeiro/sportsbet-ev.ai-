@@ -3,23 +3,30 @@ from dotenv import load_dotenv
 import os
 
 # Caminho para o diretório raiz do projeto (sportsbet-ev-ai)
-# __file__ é o caminho para session.py (backend/app/db/session.py)
 PROJECT_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 ENV_PATH = os.path.join(PROJECT_ROOT_DIR, '.env')
 
-# print(f"DEBUG: Tentando carregar .env de: {ENV_PATH}") # Linha de debug
+# print(f"DEBUG: Tentando carregar .env de: {ENV_PATH}")
 if os.path.exists(ENV_PATH):
     load_dotenv(dotenv_path=ENV_PATH)
-    # print("DEBUG: .env carregado com sucesso!") # Linha de debug
+    # print("DEBUG: .env carregado com sucesso!")
 else:
     print(f"ATENÇÃO: Arquivo .env não encontrado em {ENV_PATH}")
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+# Carrega as variáveis individuais do banco de dados
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+DB_NAME = os.getenv("DB_NAME")
 
-if not SQLALCHEMY_DATABASE_URL:
-    raise ValueError("DATABASE_URL não está configurada. Verifique seu arquivo .env na raiz do projeto ou as variáveis de ambiente.")
+if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
+    raise ValueError("Uma ou mais variáveis de configuração do banco de dados (DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME) não estão definidas.")
 
-# print(f"DEBUG: DATABASE_URL a ser usada (sem senha): {SQLALCHEMY_DATABASE_URL[:SQLALCHEMY_DATABASE_URL.find('@')]}...") # Debug
+# Constrói a SQLALCHEMY_DATABASE_URL
+SQLALCHEMY_DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# print(f"DEBUG: DATABASE_URL construída: {SQLALCHEMY_DATABASE_URL.replace(DB_PASSWORD, '********')}") # Debug, ocultando a senha
 
 engine = create_async_engine(SQLALCHEMY_DATABASE_URL, echo=False) # echo=True para debug SQL
 
@@ -36,7 +43,7 @@ async def get_db_session():
     async with AsyncSessionLocal() as session:
         try:
             yield session
-            await session.commit()
+            await session.commit() # Commit aqui pode ser muito agressivo, geralmente o commit é feito no service layer
         except Exception:
             await session.rollback()
             raise
