@@ -1,16 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-# Importe o router do health check
-from app.api.v1.endpoints import health  # Assumindo que __init__.py estão nos lugares certos
+# Importe o router principal da v1 da API
+from app.api.v1.api_v1 import api_router_v1
 
-app = FastAPI(title="SportsBet +EV AI API") # Adicionamos um título à nossa API
+app = FastAPI(
+    title="SportsBet +EV AI API",
+    description="API para a plataforma SportsBet +EV AI, fornecendo análises esportivas e recomendações.",
+    version="0.1.0" # Adicionamos uma versão para nossa API
+)
 
-# Lista de origens permitidas (endereços do seu frontend)
 origins = [
     "http://localhost:5173",
-    "http://192.168.100.169:5173", # IP da sua VM na rede local
-    # Adicione outros endereços de frontend aqui se necessário
+    "http://192.168.100.169:5173",
+    # Adicione outros aqui, como a URL de produção no futuro
 ]
 
 app.add_middleware(
@@ -21,11 +24,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 async def root():
+    """
+    Endpoint raiz da API.
+    """
     return {"message": "Bem-vindo à API SportsBet +EV AI!"}
 
-# Inclua o router do health check com um prefixo para a v1 da API
-app.include_router(health.router, prefix="/api/v1", tags=["Health Check"])
+# Inclua o router principal da v1 com um prefixo global /api/v1
+app.include_router(api_router_v1, prefix="/api/v1")
 
-# Outros routers da v1 podem ser adicionados aqui
+# O endpoint /api/v1/health foi movido para api_router_v1, então não é mais necessário aqui.
