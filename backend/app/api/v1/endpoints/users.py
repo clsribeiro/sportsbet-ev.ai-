@@ -5,8 +5,24 @@ from sqlalchemy.ext.asyncio import AsyncSession # Para tipagem da dependência d
 import app.schemas.user as user_schemas # Nossos schemas Pydantic para User
 import app.crud.crud_user as crud_user   # Nossas funções CRUD para User
 from app.db.session import get_db_session  # Nossa dependência para obter a sessão de DB
+from app.api.deps.current_user import get_current_user # Importa nossa nova dependência
+from app.models.user import User # Importa o modelo User para tipagem
 
 router = APIRouter()
+
+# Novo endpoint protegido
+@router.get("/me", response_model=user_schemas.UserRead, summary="Obter dados do usuário atual", tags=["Usuários"])
+async def read_current_user(
+    current_user: User = Depends(get_current_user) # Usa a dependência para proteger a rota
+):
+    """
+    Retorna as informações do usuário que está atualmente logado.
+    É necessário enviar um token JWT válido no cabeçalho "Authorization: Bearer <token>".
+    """
+    # A dependência get_current_user já fez todo o trabalho de validação do token
+    # e busca do usuário no banco. Se chegamos até aqui, o usuário é válido.
+    # Agora, simplesmente retornamos o objeto do usuário atual.
+    return current_user
 
 @router.post(
     "/", # Ou você pode usar "/register" se preferir um nome mais explícito

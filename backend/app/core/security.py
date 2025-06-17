@@ -1,33 +1,41 @@
-# Importa a classe CryptContext da biblioteca passlib
 from passlib.context import CryptContext
+from datetime import datetime, timedelta, timezone # Adicionado timedelta e timezone
+from typing import Any, Union # Adicionado para tipagem
+from jose import jwt # Adicionado para manipulação de JWT
 
-# Cria uma instância de CryptContext, configurando os esquemas de hashing.
-# Usaremos 'bcrypt' como o esquema padrão e principal.
-# "deprecated="auto"" instrui o passlib a atualizar automaticamente hashes
-# que possam ter sido criados com esquemas mais antigos (se aplicável no futuro).
+from app.core.config import settings # Importa nossas configurações
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verifica se uma senha em texto puro corresponde a uma senha com hash armazenada.
-
-    Args:
-        plain_password: A senha em texto puro a ser verificada.
-        hashed_password: A senha com hash armazenada no banco de dados.
-
-    Returns:
-        True se as senhas corresponderem, False caso contrário.
-    """
+    """Verifica a senha."""
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password: str) -> str:
+    """Gera o hash da senha."""
+    return pwd_context.hash(password)
+
+def create_access_token(subject: Union[str, Any], expires_delta: timedelta = None) -> str:
     """
-    Gera o hash de uma senha em texto puro usando o esquema bcrypt.
+    Cria um token de acesso JWT.
 
     Args:
-        password: A senha em texto puro a ser hasheada.
+        subject: O "assunto" do token (geralmente o ID ou email do usuário).
+        expires_delta: O tempo de vida do token.
 
     Returns:
-        A string da senha com hash.
+        O token JWT codificado como uma string.
     """
-    return pwd_context.hash(password)
+    if expires_delta:
+        expire = datetime.now(timezone.utc) + expires_delta
+    else:
+        # Se não for fornecido um delta, usa o padrão das configurações
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    # Dados a serem codificados no token
+    to_encode = {"exp": expire, "sub": str(subject)}
+
+    # Codifica o token usando a chave secreta e o algoritmo
+    encoded_jwt = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
+
+    return encoded_jwt

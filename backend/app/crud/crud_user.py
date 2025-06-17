@@ -1,9 +1,18 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select # Para SQLAlchemy 1.4+ (FastAPI geralmente usa versões mais recentes)
+from uuid import UUID # ADICIONE ESTA IMPORTAÇÃO
 
 from app.models.user import User # Nosso modelo SQLAlchemy User
 from app.schemas.user import UserCreate # Nosso schema Pydantic para criação de usuário
 from app.core.security import get_password_hash # Nossa função de hashing
+
+# Nova função para buscar usuário pelo ID
+async def get_user_by_id(db: AsyncSession, *, user_id: UUID) -> User | None:
+    """
+    Busca um usuário pelo seu ID (UUID).
+    """
+    result = await db.execute(select(User).filter(User.id == user_id))
+    return result.scalars().first()
 
 async def get_user_by_email(db: AsyncSession, *, email: str) -> User | None:
     """
