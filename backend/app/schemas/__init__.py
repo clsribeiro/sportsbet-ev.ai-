@@ -1,7 +1,9 @@
+# Modelos de autenticação existentes
 from .user import UserBase, UserCreate, UserUpdate, UserRead, UserInDBBase
 from .role import RoleBase, RoleCreate, RoleUpdate, RoleRead, RoleInDBBase
 from .permission import PermissionBase, PermissionCreate, PermissionUpdate, PermissionRead, PermissionInDBBase
 from .token import Token
 
-# Você pode adicionar aqui esquemas para as tabelas de junção se necessário no futuro,
-# ou esquemas mais complexos que combinam informações.
+# Adicionar os novos esquemas de desporto
+from .team import TeamBase, TeamCreate, TeamUpdate, TeamRead
+from .game import GameBase, GameCreate, GameUpdate, GameRead
