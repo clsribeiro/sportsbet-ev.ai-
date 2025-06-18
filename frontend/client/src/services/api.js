@@ -53,6 +53,19 @@ export const getMe = async (token) => {
   return response.data;
 };
 
-// Podemos adicionar outras funções de API aqui no futuro...
+/**
+ * Busca a lista de jogos do dia.
+ * @param {string} token - O token JWT de acesso.
+ * @returns {Promise<Array>} - Uma lista de jogos.
+ */
+export const getGames = async (token) => {
+  const response = await api.get('/games/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
 
+// Podemos adicionar outras funções de API aqui no futuro...
 export default api;

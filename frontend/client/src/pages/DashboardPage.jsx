@@ -1,24 +1,65 @@
-import React from 'react';
-import { useAuth } from '../context/AuthContext'; // Importa o nosso hook de autenticação
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { getGames } from '../services/api'; // Importa a nova função
 
 const DashboardPage = () => {
-  // Obtém os dados do utilizador e a função de logout do contexto
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth(); // Pega o token do contexto
+  const [games, setGames] = useState([]);
+  const [loadingGames, setLoadingGames] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // Busca os jogos quando o componente é montado e existe um token
+    if (token) {
+      const fetchGames = async () => {
+        try {
+          setLoadingGames(true);
+          const gamesData = await getGames(token);
+          setGames(gamesData);
+        } catch (err) {
+          console.error("Erro ao buscar jogos:", err);
+          setError("Não foi possível carregar os jogos.");
+        } finally {
+          setLoadingGames(false);
+        }
+      };
+      fetchGames();
+    }
+  }, [token]); // A dependência [token] garante que a busca só ocorre quando o token está disponível
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Dashboard - Bem-vindo à Plataforma!</h1>
+    <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Dashboard</h1>
+        <button onClick={logout} style={{ padding: '10px' }}>
+          Sair (Logout)
+        </button>
+      </div>
       {user ? (
-        <div>
-          <p>Você está autenticado como: <strong>{user.email}</strong></p>
-          <p>Nome Completo: {user.full_name || 'Não informado'}</p>
-          <p>ID do Utilizador: {user.id}</p>
-          <button onClick={logout} style={{ padding: '10px', marginTop: '20px' }}>
-            Sair (Logout)
-          </button>
-        </div>
+        <p>Bem-vindo, <strong>{user.full_name || user.email}</strong>!</p>
       ) : (
         <p>A carregar dados do utilizador...</p>
+      )}
+
+      <hr style={{ margin: '20px 0' }} />
+
+      <h2>Próximos Jogos</h2>
+      {loadingGames ? (
+        <p>A carregar jogos...</p>
+      ) : error ? (
+        <p style={{ color: 'red' }}>{error}</p>
+      ) : (
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {games.map((game) => (
+            <li key={game.id} style={{ border: '1px solid #333', padding: '15px', marginBottom: '10px', borderRadius: '8px' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                <span>{game.home_team.name}</span> vs <span>{game.away_team.name}</span>
+              </div>
+              <div>Liga: {game.home_team.league}</div>
+              <div>Data: {new Date(game.game_time).toLocaleString('pt-PT')}</div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );
