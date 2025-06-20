@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SQLAlchemyEnum
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum as SQLAlchemyEnum, Text # Adicione Text
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import enum
@@ -17,7 +17,6 @@ class Game(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
 
-    # Chaves estrangeiras para as equipas
     home_team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
     away_team_id = Column(Integer, ForeignKey("teams.id"), nullable=False)
 
@@ -27,15 +26,17 @@ class Game(Base):
     home_score = Column(Integer, nullable=True)
     away_score = Column(Integer, nullable=True)
 
-    # Dados da API (opcional, para referência futura)
+    # --- NOVOS CAMPOS ADICIONADOS ---
+    analysis = Column(Text, nullable=True, comment="Análise descritiva e o que esperar do jogo.")
+    value_bet_tip = Column(Text, nullable=True, comment="Dica de aposta de valor (+EV) identificada.")
+    # --- FIM DOS NOVOS CAMPOS ---
+
     api_provider = Column(String(50), nullable=True)
     api_game_id = Column(String(100), nullable=True)
 
-    # Relacionamentos com a tabela Team
     home_team = relationship("Team", back_populates="home_games", foreign_keys=[home_team_id])
     away_team = relationship("Team", back_populates="away_games", foreign_keys=[away_team_id])
 
-    # Opcional: Timestamps de criação/atualização do registo
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
