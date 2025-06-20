@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getGames } from '../services/api'; // Importa a nova função
+import { getGames } from '../services/api';
+import { Link } from 'react-router-dom'; // Importe o componente Link
 
 const DashboardPage = () => {
-  const { user, logout, token } = useAuth(); // Pega o token do contexto
+  const { user, logout, token } = useAuth();
   const [games, setGames] = useState([]);
   const [loadingGames, setLoadingGames] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    // Busca os jogos quando o componente é montado e existe um token
     if (token) {
       const fetchGames = async () => {
         try {
@@ -25,7 +25,7 @@ const DashboardPage = () => {
       };
       fetchGames();
     }
-  }, [token]); // A dependência [token] garante que a busca só ocorre quando o token está disponível
+  }, [token]);
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
@@ -51,13 +51,16 @@ const DashboardPage = () => {
       ) : (
         <ul style={{ listStyle: 'none', padding: 0 }}>
           {games.map((game) => (
-            <li key={game.id} style={{ border: '1px solid #333', padding: '15px', marginBottom: '10px', borderRadius: '8px' }}>
-              <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                <span>{game.home_team.name}</span> vs <span>{game.away_team.name}</span>
-              </div>
-              <div>Liga: {game.home_team.league}</div>
-              <div>Data: {new Date(game.game_time).toLocaleString('pt-PT')}</div>
-            </li>
+            // Envolva o item da lista com um Link
+            <Link to={`/games/${game.id}`} key={game.id} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <li style={{ border: '1px solid #333', padding: '15px', marginBottom: '10px', borderRadius: '8px', cursor: 'pointer' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
+                  <span>{game.home_team.name}</span> vs <span>{game.away_team.name}</span>
+                </div>
+                <div>Liga: {game.home_team.league}</div>
+                <div>Data: {new Date(game.game_time).toLocaleString('pt-PT')}</div>
+              </li>
+            </Link>
           ))}
         </ul>
       )}

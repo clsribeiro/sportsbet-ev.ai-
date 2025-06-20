@@ -67,5 +67,20 @@ export const getGames = async (token) => {
   return response.data;
 };
 
+/**
+ * Busca os detalhes de um jogo específico.
+ * @param {string} token - O token JWT de acesso.
+ * @param {number} gameId - O ID do jogo.
+ * @returns {Promise<object>} - Os detalhes do jogo.
+ */
+export const getGameDetails = async (token, gameId) => {
+  const response = await api.get(`/games/${gameId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;
