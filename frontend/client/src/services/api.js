@@ -162,5 +162,67 @@ export const updateRolePermissions = async (token, roleId, permissionIds) => {
   return response.data;
 };
 
+// ... (funções existentes) ...
+
+/**
+ * Busca a lista de todos os utilizadores. Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @returns {Promise<Array>} - Uma lista de utilizadores.
+ */
+export const getUsers = async (token) => {
+  const response = await api.get('/admin/users/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Busca os detalhes de um utilizador específico (para obter os seus roles). Requer privilégios de admin.
+ * Embora não tenhamos criado um endpoint específico para detalhes do utilizador (poderíamos),
+ * por agora, vamos obter os detalhes do utilizador a partir da lista geral.
+ * Se quiséssemos um endpoint dedicado, seria GET /admin/users/{user_id}
+ */
+
+/**
+ * Atualiza os planos (roles) de um utilizador. Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @param {string} userId - O ID do utilizador a ser atualizado.
+ * @param {Array<number>} roleIds - Uma lista com os IDs dos novos planos.
+ * @returns {Promise<object>} - O utilizador atualizado.
+ */
+export const updateUserRoles = async (token, userId, roleIds) => {
+  const response = await api.put(`/admin/users/${userId}/roles`,
+    { role_ids: roleIds }, // O corpo da requisição
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
+/**
+ * Busca os detalhes de um utilizador específico pelo seu ID. Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @param {string} userId - O ID do utilizador.
+ * @returns {Promise<object>} - Os detalhes do utilizador, incluindo os seus planos (roles).
+ */
+export const getUserDetails = async (token, userId) => {
+  // Nota: Não criámos um endpoint dedicado /admin/users/{id} porque a nossa lista de
+  // utilizadores já retorna os roles. Numa app maior, poderíamos criar um.
+  // Por agora, esta função é um placeholder para o conceito.
+  // A lógica real estará na página, que irá filtrar da lista de utilizadores.
+  // Ou, podemos simplesmente buscar a lista completa novamente se ela for pequena.
+  // Vamos usar a abordagem de filtrar os dados já existentes na página de detalhes.
+  // Se fosse para chamar a API, seria assim:
+  // const response = await api.get(`/admin/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+  // return response.data;
+  console.warn("getUserDetails não está a chamar a API, use os dados passados por state.");
+  return Promise.resolve({}); // Retorna uma promessa vazia, pois a lógica será diferente.
+};
+
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;

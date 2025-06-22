@@ -1,59 +1,64 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select # Para SQLAlchemy 1.4+ (FastAPI geralmente usa versões mais recentes)
-from uuid import UUID # ADICIONE ESTA IMPORTAÇÃO
+from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
+from uuid import UUID
+from typing import List
 
-from app.models.user import User # Nosso modelo SQLAlchemy User
-from app.schemas.user import UserCreate # Nosso schema Pydantic para criação de usuário
-from app.core.security import get_password_hash # Nossa função de hashing
+from app.models.user import User
+from app.models.role import Role # Importe o modelo Role
+from app.schemas.user import UserCreate
 
-# Nova função para buscar usuário pelo ID
 async def get_user_by_id(db: AsyncSession, *, user_id: UUID) -> User | None:
-    """
-    Busca um usuário pelo seu ID (UUID).
-    """
-    result = await db.execute(select(User).filter(User.id == user_id))
+    """Busca um único utilizador pelo seu ID, carregando os seus planos (roles)."""
+    result = await db.execute(
+        select(User)
+        .where(User.id == user_id)
+        .options(selectinload(User.roles)) # Carregamento otimizado dos roles
+    )
     return result.scalars().first()
 
 async def get_user_by_email(db: AsyncSession, *, email: str) -> User | None:
-    """
-    Busca um usuário pelo email.
-
-    Args:
-        db: A sessão assíncrona do banco de dados.
-        email: O email a ser buscado.
-
-    Returns:
-        O objeto User se encontrado, caso contrário None.
-    """
+    """Busca um utilizador pelo email."""
     result = await db.execute(select(User).filter(User.email == email))
     return result.scalars().first()
 
+async def get_users(db: AsyncSession, *, skip: int = 0, limit: int = 100) -> List[User]:
+    """Busca uma lista de todos os utilizadores."""
+    result = await db.execute(
+        select(User)
+        .order_by(User.email.asc())
+        .options(selectinload(User.roles)) # Opcional: carregar roles para a lista
+        .offset(skip)
+        .limit(limit)
+    )
+    return result.scalars().all()
+
 async def create_user(db: AsyncSession, *, user_in: UserCreate) -> User:
-    """
-    Cria um novo usuário no banco de dados.
-
-    Args:
-        db: A sessão assíncrona do banco de dados.
-        user_in: Os dados do usuário a serem criados (do schema Pydantic UserCreate).
-
-    Returns:
-        O objeto User criado.
-    """
-    # Cria um dicionário com os dados do schema, excluindo a senha em texto puro
-    # para não tentar passá-la diretamente para o modelo User SQLAlchemy.
-    db_user_data = user_in.model_dump(exclude={"password"}) # Pydantic v2
-    # Se Pydantic v1: db_user_data = user_in.dict(exclude={"password"})
-
+    """Cria um novo utilizador no banco de dados."""
+    db_user_data = user_in.model_dump(exclude={"password"})
     hashed_password = get_password_hash(user_in.password)
-
     db_user = User(**db_user_data, hashed_password=hashed_password)
-
     db.add(db_user)
-    await db.commit() # Salva o usuário no banco
-    await db.refresh(db_user) # Atualiza o objeto db_user com dados do banco (ex: ID gerado)
+    await db.commit()
+    await db.refresh(db_user)
     return db_user
 
-# Poderíamos adicionar outras funções CRUD aqui no futuro:
-# async def get_user(db: AsyncSession, user_id: int) -> User | None: ...
-# async def update_user(db: AsyncSession, *, db_user: User, user_in: UserUpdate) -> User: ...
-# async def delete_user(db: AsyncSession, *, user_id: int) -> User | None: ...
+async def update_user_roles(db: AsyncSession, *, user: User, role_ids: List[int]) -> User:
+    """Atualiza os planos (roles) de um utilizador."""
+    # Busca todos os objetos de role correspondentes aos IDs fornecidos
+    result = await db.execute(select(Role).where(Role.id.in_(role_ids)))
+    roles = result.scalars().all()
+
+    # Substitui a lista de roles do utilizador pela nova lista
+    user.roles = roles
+
+    db.add(user)
+    await db.commit()
+    await db.refresh(user)
+
+    # Recarrega o utilizador com os roles para a resposta
+    updated_user = await get_user_by_id(db, user_id=user.id)
+    return updated_user
+
+# Não se esqueça de importar get_password_hash se ainda estiver a ser usado aqui
+from app.core.security import get_password_hash

@@ -33,7 +33,9 @@ const DashboardPage = () => {
         <h1>Dashboard</h1>
         {/* LINK DE ADMIN CONDICIONAL */}
         {user && user.is_superuser && (
-          <Link to="/admin/plans" style={{ padding: '10px', background: '#e53935', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+          <Link to="/admin/users" // Aponta para a nova página de utilizadores
+            style={{ padding: '10px', background: '#e53935', color: 'white', textDecoration: 'none', borderRadius: '4px' }}
+          >
             Painel de Admin
           </Link>
         )}
