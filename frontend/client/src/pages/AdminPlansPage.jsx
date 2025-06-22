@@ -98,13 +98,14 @@ const AdminPlansPage = () => {
 
       <h2>Planos Existentes</h2>
       <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
-        {/* ... (código da tabela existente) ... */}
         <thead>
           <tr style={{ borderBottom: '1px solid #444' }}>
             <th style={{ padding: '8px', textAlign: 'left' }}>ID</th>
             <th style={{ padding: '8px', textAlign: 'left' }}>Nome de Exibição</th>
             <th style={{ padding: '8px', textAlign: 'left' }}>Nome Técnico</th>
             <th style={{ padding: '8px', textAlign: 'left' }}>Status</th>
+            {/* --- NOVA COLUNA --- */}
+            <th style={{ padding: '8px', textAlign: 'center' }}>Ações</th> 
           </tr>
         </thead>
         <tbody>
@@ -114,6 +115,15 @@ const AdminPlansPage = () => {
               <td style={{ padding: '8px' }}>{role.display_name}</td>
               <td style={{ padding: '8px' }}><code>{role.name}</code></td>
               <td style={{ padding: '8px' }}>{role.is_active ? 'Ativo' : 'Inativo'}</td>
+              {/* --- NOVA CÉLULA COM O LINK --- */}
+              <td style={{ padding: '8px', textAlign: 'center' }}>
+                <Link 
+                  to={`/admin/plans/${role.id}`}
+                  style={{ textDecoration: 'none', color: '#646cff', fontWeight: 'bold' }}
+                >
+                  Gerir Permissões
+                </Link>
+              </td>
             </tr>
           ))}
         </tbody>

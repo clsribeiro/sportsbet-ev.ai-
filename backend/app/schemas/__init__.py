@@ -1,9 +1,12 @@
-# Modelos de autenticação existentes
-from .user import UserBase, UserCreate, UserUpdate, UserRead, UserInDBBase
-from .role import RoleBase, RoleCreate, RoleUpdate, RoleRead, RoleInDBBase
-from .permission import PermissionBase, PermissionCreate, PermissionUpdate, PermissionRead, PermissionInDBBase
+# Modelos de autenticação
+from .user import UserBase, UserCreate, UserUpdate, UserRead
 from .token import Token
 
-# Adicionar os novos esquemas de desporto
+# Modelos de Roles/Planos e Permissões
+# Corrigido para importar apenas os schemas que existem em role.py
+from .role import RoleBase, RoleCreate, RoleUpdate, RoleRead, RoleReadWithPermissions, RoleUpdatePermissions
+from .permission import PermissionBase, PermissionCreate, PermissionUpdate, PermissionRead
+
+# Modelos de Desporto
 from .team import TeamBase, TeamCreate, TeamUpdate, TeamRead
 from .game import GameBase, GameCreate, GameUpdate, GameRead

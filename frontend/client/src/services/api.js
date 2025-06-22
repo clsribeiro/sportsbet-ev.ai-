@@ -126,5 +126,41 @@ export const createRole = async (token, roleData) => {
   return response.data;
 };
 
+// ... (funções existentes) ...
+
+/**
+ * Busca os detalhes de um Plano (Role) específico, incluindo as suas permissões.
+ * @param {string} token - O token JWT de acesso.
+ * @param {number} roleId - O ID do plano.
+ * @returns {Promise<object>} - Os detalhes do plano.
+ */
+export const getRoleDetails = async (token, roleId) => {
+  const response = await api.get(`/admin/roles/${roleId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Atualiza as permissões de um Plano (Role).
+ * @param {string} token - O token JWT de acesso.
+ * @param {number} roleId - O ID do plano a ser atualizado.
+ * @param {Array<number>} permissionIds - Uma lista com os IDs das novas permissões.
+ * @returns {Promise<object>} - O plano atualizado.
+ */
+export const updateRolePermissions = async (token, roleId, permissionIds) => {
+  const response = await api.put(`/admin/roles/${roleId}/permissions`, 
+    { permission_ids: permissionIds }, // O corpo da requisição
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;

@@ -7,6 +7,7 @@ import AdminPlansPage from './pages/AdminPlansPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import { useAuth } from './context/AuthContext';
+import AdminPlanDetailPage from './pages/AdminPlanDetailPage'; 
 import './App.css';
 
 function App() {
@@ -51,7 +52,15 @@ function App() {
               </AdminRoute>
             }
           />
-
+          {/* --- NOVA ROTA DINÂMICA DE ADMIN --- */}
+          <Route
+            path="/admin/plans/:roleId" // :roleId é um parâmetro dinâmico
+            element={
+              <AdminRoute>
+                <AdminPlanDetailPage />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </div>
     </Router>
