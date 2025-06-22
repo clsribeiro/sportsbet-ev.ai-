@@ -82,5 +82,33 @@ export const getGameDetails = async (token, gameId) => {
   return response.data;
 };
 
+/**
+ * Busca a lista de todos os Planos (Roles). Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @returns {Promise<Array>} - Uma lista de planos (roles).
+ */
+export const getRoles = async (token) => {
+  const response = await api.get('/admin/roles/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Busca a lista de todas as Permissões. Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @returns {Promise<Array>} - Uma lista de permissões.
+ */
+export const getPermissions = async (token) => {
+  const response = await api.get('/admin/permissions/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;
