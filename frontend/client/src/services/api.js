@@ -109,6 +109,22 @@ export const getPermissions = async (token) => {
   });
   return response.data;
 };
+// ... (funções existentes) ...
+
+/**
+ * Cria um novo Plano (Role). Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @param {object} roleData - Objeto com os dados do novo plano (name, display_name, description).
+ * @returns {Promise<object>} - O plano recém-criado.
+ */
+export const createRole = async (token, roleData) => {
+  const response = await api.post('/admin/roles/', roleData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
 
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;

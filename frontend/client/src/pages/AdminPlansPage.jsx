@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getRoles } from '../services/api'; // Importa a nossa nova função
+import { getRoles, createRole } from '../services/api'; // Importa a nova função createRole
 import { Link } from 'react-router-dom';
 
 const AdminPlansPage = () => {
@@ -9,34 +9,96 @@ const AdminPlansPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Estado para o formulário de novo plano
+  const [newRoleName, setNewRoleName] = useState('');
+  const [newRoleDisplayName, setNewRoleDisplayName] = useState('');
+  const [formError, setFormError] = useState('');
+
+  const fetchRoles = async () => {
+    try {
+      setLoading(true);
+      const rolesData = await getRoles(token);
+      setRoles(rolesData);
+    } catch (err) {
+      console.error("Erro ao buscar planos:", err);
+      setError("Não foi possível carregar os planos. Verifique se tem permissões de administrador.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (token) {
-      const fetchRoles = async () => {
-        try {
-          setLoading(true);
-          const rolesData = await getRoles(token);
-          setRoles(rolesData);
-        } catch (err) {
-          console.error("Erro ao buscar planos:", err);
-          setError("Não foi possível carregar os planos. Verifique se tem permissões de administrador.");
-        } finally {
-          setLoading(false);
-        }
-      };
       fetchRoles();
     }
   }, [token]);
+
+  const handleCreateRole = async (e) => {
+    e.preventDefault();
+    setFormError('');
+    if (!newRoleName || !newRoleDisplayName) {
+      setFormError('Ambos os nomes (técnico e de exibição) são obrigatórios.');
+      return;
+    }
+
+    try {
+      const roleData = {
+        name: newRoleName,
+        display_name: newRoleDisplayName,
+        description: "Plano criado via painel de admin.", // Descrição padrão
+      };
+      await createRole(token, roleData);
+      alert('Plano criado com sucesso!');
+      // Limpa os campos e atualiza a lista
+      setNewRoleName('');
+      setNewRoleDisplayName('');
+      fetchRoles(); 
+    } catch (err) {
+      console.error("Erro ao criar plano:", err);
+      setFormError(err.response?.data?.detail || 'Ocorreu um erro ao criar o plano.');
+    }
+  };
 
   if (loading) return <div>A carregar planos...</div>;
   if (error) return <div style={{ color: 'red' }}>{error}</div>;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
+    <div style={{ padding: '20px', maxWidth: '900px', margin: 'auto' }}>
       <Link to="/">&larr; Voltar ao Dashboard</Link>
       <h1 style={{ marginTop: '20px' }}>Gestão de Planos (Roles)</h1>
-      <p>Esta página lista todos os planos de assinatura disponíveis no sistema.</p>
 
+      {/* Formulário para Novo Plano */}
+      <div style={{ padding: '15px', border: '1px solid #444', borderRadius: '8px', marginBottom: '30px' }}>
+        <h2>Criar Novo Plano</h2>
+        <form onSubmit={handleCreateRole}>
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor="displayName">Nome de Exibição (ex: +EV Starter):</label>
+            <input
+              type="text"
+              id="displayName"
+              value={newRoleDisplayName}
+              onChange={(e) => setNewRoleDisplayName(e.target.value)}
+              style={{ width: '100%', padding: '8px', background: '#333', border: '1px solid #555', color: 'white' }}
+            />
+          </div>
+          <div style={{ marginBottom: '10px' }}>
+            <label htmlFor="technicalName">Nome Técnico (ex: plan_starter):</label>
+            <input
+              type="text"
+              id="technicalName"
+              value={newRoleName}
+              onChange={(e) => setNewRoleName(e.target.value)}
+              style={{ width: '100%', padding: '8px', background: '#333', border: '1px solid #555', color: 'white' }}
+            />
+          </div>
+          {formError && <p style={{ color: 'red' }}>{formError}</p>}
+          <button type="submit" style={{ padding: '10px 15px' }}>Criar Plano</button>
+        </form>
+      </div>
+
+      <h2>Planos Existentes</h2>
       <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
+        {/* ... (código da tabela existente) ... */}
         <thead>
           <tr style={{ borderBottom: '1px solid #444' }}>
             <th style={{ padding: '8px', textAlign: 'left' }}>ID</th>
