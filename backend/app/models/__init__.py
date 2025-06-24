@@ -8,4 +8,5 @@ from .user_feature_preference import UserFeaturePreference
 
 # Adicione os novos modelos de desporto
 from .team import Team
-from .game import Game
+from .game import Game, GameStatus # <- CORREÇÃO AQUI: Adicionado GameStatus
+from .league import League

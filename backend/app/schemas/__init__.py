@@ -10,3 +10,4 @@ from .permission import PermissionBase, PermissionCreate, PermissionUpdate, Perm
 # Modelos de Desporto
 from .team import TeamBase, TeamCreate, TeamUpdate, TeamRead
 from .game import GameBase, GameCreate, GameUpdate, GameRead
+from .league import LeagueBase, LeagueCreate, LeagueRead
