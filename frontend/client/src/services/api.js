@@ -224,5 +224,25 @@ export const getUserDetails = async (token, userId) => {
   return Promise.resolve({}); // Retorna uma promessa vazia, pois a lógica será diferente.
 };
 
+// ... (funções existentes) ...
+
+/**
+ * Pede ao backend para gerar ou obter a previsão de IA para um jogo.
+ * @param {string} token - O token JWT de acesso.
+ * @param {number} gameId - O ID do jogo.
+ * @returns {Promise<object>} - Os dados da previsão.
+ */
+export const generatePrediction = async (token, gameId) => {
+  const response = await api.post(`/games/${gameId}/predict`, 
+    {}, // O corpo do POST pode ser vazio, conforme o nosso endpoint
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;

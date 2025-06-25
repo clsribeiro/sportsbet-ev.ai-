@@ -1,14 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom'; // useParams para ler o ID da URL
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getGameDetails } from '../services/api';
+// Importa ambas as funções da API
+import { getGameDetails, generatePrediction } from '../services/api'; 
+// Importa o novo componente de exibição
+import PredictionDisplay from '../components/PredictionDisplay';
 
 const GameDetailPage = () => {
-  const { gameId } = useParams(); // Obtém o 'gameId' da URL (ex: /games/1)
+  const { gameId } = useParams();
   const { token } = useAuth();
   const [game, setGame] = useState(null);
+  const [prediction, setPrediction] = useState(null); // Novo estado para a previsão
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [predictionLoading, setPredictionLoading] = useState(false); // Loading para o botão
 
   useEffect(() => {
     if (token && gameId) {
@@ -28,28 +33,59 @@ const GameDetailPage = () => {
     }
   }, [token, gameId]);
 
+  // Função para ser chamada pelo botão
+  const handleGeneratePrediction = async () => {
+    if (token && gameId) {
+      try {
+        setPredictionLoading(true);
+        setError('');
+        const predictionData = await generatePrediction(token, gameId);
+        setPrediction(predictionData);
+      } catch (err) {
+        console.error("Erro ao gerar previsão:", err);
+        setError("Não foi possível obter a análise da IA. Tente novamente.");
+      } finally {
+        setPredictionLoading(false);
+      }
+    }
+  };
+
   if (loading) return <div>A carregar detalhes do jogo...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
-  if (!game) return <div>Jogo não encontrado.</div>;
+  if (!game && !error) return <div>Jogo não encontrado.</div>;
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
       <Link to="/">&larr; Voltar ao Dashboard</Link>
 
-      <h1 style={{ marginTop: '20px' }}>{game.home_team.name} vs {game.away_team.name}</h1>
-      <p><strong>Liga:</strong> {game.home_team.league}</p>
-      <p><strong>Data:</strong> {new Date(game.game_time).toLocaleString('pt-PT')}</p>
-      <p><strong>Status:</strong> {game.status}</p>
+      {game && (
+        <>
+          <h1 style={{ marginTop: '20px' }}>{game.home_team.name} vs {game.away_team.name}</h1>
+          <p><strong>Liga:</strong> {game.home_team.league}</p>
+          <p><strong>Data:</strong> {new Date(game.game_time).toLocaleString('pt-PT')}</p>
+          <p><strong>Status:</strong> {game.status}</p>
+        </>
+      )}
 
-      <div style={{ marginTop: '30px', padding: '15px', background: '#2a2a2a', borderRadius: '8px' }}>
-        <h3>Análise da Partida</h3>
-        <p>{game.analysis || "Análise não disponível."}</p>
-      </div>
+      <hr style={{ margin: '30px 0' }} />
 
-      <div style={{ marginTop: '20px', padding: '15px', background: '#004d40', borderRadius: '8px' }}>
-        <h3>Dica de Aposta de Valor (+EV)</h3>
-        <p>{game.value_bet_tip || "Nenhuma dica de valor identificada para esta partida."}</p>
-      </div>
+      {/* Secção de Análise de IA */}
+      {prediction ? (
+        // Se já tivermos uma previsão, exibe o componente
+        <PredictionDisplay prediction={prediction} />
+      ) : (
+        // Caso contrário, mostra o botão para gerar uma
+        <div style={{ textAlign: 'center' }}>
+          <button 
+            onClick={handleGeneratePrediction} 
+            disabled={predictionLoading}
+            style={{ padding: '15px 30px', fontSize: '1.2em', cursor: 'pointer' }}
+          >
+            {predictionLoading ? 'A gerar análise...' : 'Gerar Análise de IA'}
+          </button>
+        </div>
+      )}
+
+      {error && <p style={{ color: 'red', marginTop: '20px' }}>{error}</p>}
     </div>
   );
 };
