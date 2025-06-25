@@ -37,6 +37,12 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# --- INÍCIO DA NOSSA LINHA DE DEBUG ---
+print("--- Tabelas detetadas pelo Alembic ---")
+print(Base.metadata.tables.keys())
+print("------------------------------------")
+# --- FIM DA NOSSA LINHA DE DEBUG ---
+
 target_metadata = Base.metadata
 
 def get_database_url_sync():

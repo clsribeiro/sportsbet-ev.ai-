@@ -6,7 +6,10 @@ from .role import Role, role_permission_association_table
 from .permission import Permission
 from .user_feature_preference import UserFeaturePreference
 
-# Adicione os novos modelos de desporto
+# Importe os modelos de desporto existentes
 from .team import Team
-from .game import Game, GameStatus # <- CORREÇÃO AQUI: Adicionado GameStatus
+from .game import Game, GameStatus
 from .league import League
+
+# --- CORREÇÃO AQUI: Importe o novo modelo de Previsão ---
+from .prediction import Prediction
