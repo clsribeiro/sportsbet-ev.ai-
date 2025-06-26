@@ -34,5 +34,8 @@ class Settings:
     API_FOOTBALL_KEY: str = os.getenv("API_FOOTBALL_KEY")
     API_FOOTBALL_HOST: str = "v3.football.api-sports.io" # O host da API
 
+    # --- NOVA CONFIGURAÇÃO ADICIONADA - GOOGLE AI STUDIO ---
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
+
 # Cria uma instância das configurações para ser usada em toda a aplicação
 settings = Settings()
