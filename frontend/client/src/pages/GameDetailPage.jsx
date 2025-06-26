@@ -1,91 +1,113 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// Importa ambas as funções da API
-import { getGameDetails, generatePrediction } from '../services/api'; 
-// Importa o novo componente de exibição
+import { getGameDetails, generatePrediction } from '../services/api';
 import PredictionDisplay from '../components/PredictionDisplay';
 
 const GameDetailPage = () => {
   const { gameId } = useParams();
   const { token } = useAuth();
+  
+  // Estados separados para cada parte da página
   const [game, setGame] = useState(null);
-  const [prediction, setPrediction] = useState(null); // Novo estado para a previsão
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [predictionLoading, setPredictionLoading] = useState(false); // Loading para o botão
+  const [prediction, setPrediction] = useState(null);
+  
+  const [gameLoading, setGameLoading] = useState(true);
+  const [predictionLoading, setPredictionLoading] = useState(true);
+  
+  const [gameError, setGameError] = useState('');
+  const [predictionError, setPredictionError] = useState('');
 
-  useEffect(() => {
-    if (token && gameId) {
-      const fetchGameDetails = async () => {
-        try {
-          setLoading(true);
-          const gameData = await getGameDetails(token, gameId);
-          setGame(gameData);
-        } catch (err) {
-          console.error("Erro ao buscar detalhes do jogo:", err);
-          setError("Não foi possível carregar os detalhes do jogo.");
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchGameDetails();
-    }
-  }, [token, gameId]);
-
-  // Função para ser chamada pelo botão
-  const handleGeneratePrediction = async () => {
+  // Função para buscar a previsão da IA. Pode ser chamada ao carregar ou ao clicar no botão.
+  const fetchPrediction = useCallback(async () => {
     if (token && gameId) {
       try {
         setPredictionLoading(true);
-        setError('');
+        setPredictionError(''); // Limpa erros anteriores
         const predictionData = await generatePrediction(token, gameId);
         setPrediction(predictionData);
       } catch (err) {
-        console.error("Erro ao gerar previsão:", err);
-        setError("Não foi possível obter a análise da IA. Tente novamente.");
+        console.error("Erro ao buscar previsão da IA:", err);
+        setPredictionError("Falha ao obter a análise da IA.");
       } finally {
         setPredictionLoading(false);
       }
     }
+  }, [token, gameId]);
+
+  // useEffect para buscar os dados essenciais do jogo
+  useEffect(() => {
+    const fetchGameData = async () => {
+      if (token && gameId) {
+        try {
+          setGameLoading(true);
+          const gameData = await getGameDetails(token, gameId);
+          setGame(gameData);
+        } catch (err) {
+          console.error("Erro ao buscar detalhes do jogo:", err);
+          setGameError("Não foi possível carregar os detalhes do jogo.");
+        } finally {
+          setGameLoading(false);
+        }
+      }
+    };
+    fetchGameData();
+  }, [token, gameId]);
+  
+  // useEffect para buscar a previsão da IA automaticamente
+  useEffect(() => {
+    // Só busca a previsão se já tivermos os dados do jogo, para evitar condições de corrida
+    if (game) {
+      fetchPrediction();
+    }
+  }, [game, fetchPrediction]); // Depende do 'game' e da função `fetchPrediction`
+
+  // Função para renderizar a secção de previsão
+  const renderPredictionSection = () => {
+    if (predictionLoading) {
+      return <p>A gerar análise de IA...</p>;
+    }
+    if (predictionError) {
+      return (
+        <div>
+          <p style={{ color: 'orange' }}>{predictionError}</p>
+          <button onClick={fetchPrediction} style={{ marginTop: '10px' }}>Tentar Novamente</button>
+        </div>
+      );
+    }
+    if (prediction) {
+      return <PredictionDisplay prediction={prediction} />;
+    }
+    // Não mostra nada se não houver previsão e não estiver a carregar nem com erro
+    return null; 
   };
 
-  if (loading) return <div>A carregar detalhes do jogo...</div>;
-  if (!game && !error) return <div>Jogo não encontrado.</div>;
+  if (gameLoading) {
+    return <div style={{ textAlign: 'center', marginTop: '50px' }}><h2>A carregar dados do jogo...</h2></div>;
+  }
 
+  if (gameError) {
+    return <div style={{ color: 'red', textAlign: 'center', marginTop: '50px' }}>{gameError}</div>;
+  }
+  
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
       <Link to="/">&larr; Voltar ao Dashboard</Link>
-
-      {game && (
+      
+      {game ? (
         <>
           <h1 style={{ marginTop: '20px' }}>{game.home_team.name} vs {game.away_team.name}</h1>
           <p><strong>Liga:</strong> {game.home_team.league}</p>
           <p><strong>Data:</strong> {new Date(game.game_time).toLocaleString('pt-PT')}</p>
           <p><strong>Status:</strong> {game.status}</p>
         </>
-      )}
-
-      <hr style={{ margin: '30px 0' }} />
-
-      {/* Secção de Análise de IA */}
-      {prediction ? (
-        // Se já tivermos uma previsão, exibe o componente
-        <PredictionDisplay prediction={prediction} />
       ) : (
-        // Caso contrário, mostra o botão para gerar uma
-        <div style={{ textAlign: 'center' }}>
-          <button 
-            onClick={handleGeneratePrediction} 
-            disabled={predictionLoading}
-            style={{ padding: '15px 30px', fontSize: '1.2em', cursor: 'pointer' }}
-          >
-            {predictionLoading ? 'A gerar análise...' : 'Gerar Análise de IA'}
-          </button>
-        </div>
+        <div style={{ textAlign: 'center', marginTop: '50px' }}>Jogo não encontrado.</div>
       )}
 
-      {error && <p style={{ color: 'red', marginTop: '20px' }}>{error}</p>}
+      <hr style={{ margin: '30px 0', borderColor: '#444' }} />
+
+      {renderPredictionSection()}
     </div>
   );
 };
