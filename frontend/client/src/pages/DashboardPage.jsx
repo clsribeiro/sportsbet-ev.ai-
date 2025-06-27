@@ -31,14 +31,16 @@ const DashboardPage = () => {
     <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Dashboard</h1>
-        {/* LINK DE ADMIN CONDICIONAL */}
-        {user && user.is_superuser && (
-          <Link to="/admin/users" // Aponta para a nova página de utilizadores
-            style={{ padding: '10px', background: '#e53935', color: 'white', textDecoration: 'none', borderRadius: '4px' }}
-          >
-            Painel de Admin
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <Link to="/predictions" style={{ padding: '10px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+            Ver Dicas da IA
           </Link>
-        )}
+          {user && user.is_superuser && (
+            <Link to="/admin/users" style={{ padding: '10px', background: '#e53935', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+              Painel de Admin
+            </Link>
+          )}
+        </div>
         <button onClick={logout} style={{ padding: '10px' }}>
           Sair (Logout)
         </button>

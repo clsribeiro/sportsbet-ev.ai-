@@ -11,9 +11,11 @@ import AdminLayout from './components/AdminLayout';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import GameDetailPage from './pages/GameDetailPage';
+import PredictionsPage from './pages/PredictionsPage'; // Página de Dicas da IA
 import AdminPlansPage from './pages/AdminPlansPage';
 import AdminUsersPage from './pages/AdminUsersPage';
-import AdminUserDetailPage from './pages/AdminUserDetailPage'; // Importa a nova página
+import AdminUserDetailPage from './pages/AdminUserDetailPage';
+import AdminTasksPage from './pages/AdminTasksPage'; // Página de Tarefas do Admin
 
 // Importação do CSS
 import './App.css';
@@ -32,25 +34,10 @@ function App() {
           />
           
           {/* --- Rotas para Utilizadores Autenticados --- */}
-          {/* Rota Raiz ('/'): Protegida, leva ao Dashboard */}
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/games/:gameId" element={<ProtectedRoute><GameDetailPage /></ProtectedRoute>} />
+          <Route path="/predictions" element={<ProtectedRoute><PredictionsPage /></ProtectedRoute>} />
 
-          {/* Rota para Detalhes do Jogo */}
-          <Route
-            path="/games/:gameId" // O :gameId é um parâmetro dinâmico
-            element={
-              <ProtectedRoute>
-                <GameDetailPage />
-              </ProtectedRoute>
-            }
-          />
 
           {/* --- Rotas de Administração Agrupadas --- */}
           {/* A rota pai /admin é protegida pela AdminRoute e renderiza o AdminLayout */}
@@ -64,8 +51,9 @@ function App() {
           >
             {/* As rotas filhas são renderizadas dentro do <Outlet /> do AdminLayout */}
             <Route path="users" element={<AdminUsersPage />} />
-            <Route path="users/:userId" element={<AdminUserDetailPage />} /> {/* Adiciona a rota de detalhes do utilizador */}
+            <Route path="users/:userId" element={<AdminUserDetailPage />} />
             <Route path="plans" element={<AdminPlansPage />} />
+            <Route path="tasks" element={<AdminTasksPage />} />
           </Route>
           
         </Routes>

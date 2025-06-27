@@ -244,5 +244,36 @@ export const generatePrediction = async (token, gameId) => {
   return response.data;
 };
 
+/**
+ * Aciona a tarefa de pré-análise no backend. Requer privilégios de admin.
+ * @param {string} token - O token JWT de acesso.
+ * @returns {Promise<object>} - A resposta da API sobre o estado da tarefa.
+ */
+export const runPreAnalysisTask = async (token) => {
+  const response = await api.post('/admin/tasks/run-pre-analysis', 
+    {}, // Corpo do POST pode ser vazio
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+};
+
+/**
+ * Busca a lista de previsões mais recentes.
+ * @param {string} token - O token JWT de acesso.
+ * @returns {Promise<Array>} - Uma lista de previsões com os dados dos jogos.
+ */
+export const getPredictions = async (token) => {
+  const response = await api.get('/predictions/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
 // Podemos adicionar outras funções de API aqui no futuro...
 export default api;

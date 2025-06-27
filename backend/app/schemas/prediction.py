@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
+# Importa o schema do Jogo para o relacionamento
+from .game import GameRead
+
 class PredictionBase(BaseModel):
     predicted_winner: Optional[str] = None
     prediction_summary: Optional[str] = None
@@ -19,5 +22,10 @@ class PredictionRead(PredictionBase):
     id: int
     game_id: int
     created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
+# NOVO ESQUEMA (NO SÍTIO CERTO)
+# Para ler uma Previsão com os detalhes do Jogo associado
+class PredictionReadWithGame(PredictionRead):
+    game: GameRead
     model_config = ConfigDict(from_attributes=True)

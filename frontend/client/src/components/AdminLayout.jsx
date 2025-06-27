@@ -15,7 +15,11 @@ const AdminLayout = () => {
           <li style={{ marginBottom: '10px' }}>
             <Link to="/admin/plans" style={{ color: '#646cff', textDecoration: 'none', fontSize: '1.1em' }}>Gestão de Planos</Link>
           </li>
+          <li style={{ marginBottom: '10px' }}>
+            <Link to="/admin/tasks" style={{ color: '#646cff', textDecoration: 'none', fontSize: '1.1em' }}>Tarefas</Link>
+          </li>
           {/* Adicionar mais links de admin aqui no futuro */}
+
         </ul>
         <hr style={{ borderColor: '#444', margin: '20px 0' }} />
         <Link to="/" style={{ color: 'white', textDecoration: 'none' }}>

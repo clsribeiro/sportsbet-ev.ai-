@@ -17,16 +17,7 @@ class PermissionUpdate(BaseModel):
     description: Optional[str] = Field(None, max_length=255)
     module_group: Optional[str] = Field(None, max_length=50)
 
-# Esquema para representar a Permissão como está no DB
-class PermissionInDBBase(PermissionBase):
-    id: int
-    # created_at: datetime # Poderíamos adicionar timestamps
-    # updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
 # Esquema para ler/retornar dados da Permissão na API
 class PermissionRead(PermissionBase):
     id: int
-
     model_config = ConfigDict(from_attributes=True)
