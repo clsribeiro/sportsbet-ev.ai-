@@ -7,15 +7,16 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import AdminLayout from './components/AdminLayout';
 
-// Importação das Páginas
+// Importação de Todas as Páginas
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import GameDetailPage from './pages/GameDetailPage';
-import PredictionsPage from './pages/PredictionsPage'; // Página de Dicas da IA
+import PredictionsPage from './pages/PredictionsPage';
 import AdminPlansPage from './pages/AdminPlansPage';
-import AdminUsersPage from './pages/AdminUsersPage';
 import AdminUserDetailPage from './pages/AdminUserDetailPage';
-import AdminTasksPage from './pages/AdminTasksPage'; // Página de Tarefas do Admin
+import AdminUsersPage from './pages/AdminUsersPage'; // <-- IMPORTAÇÃO CORRIGIDA
+import AdminTasksPage from './pages/AdminTasksPage';
+import AdminPlanDetailPage from './pages/AdminPlanDetailPage';
 
 // Importação do CSS
 import './App.css';
@@ -27,7 +28,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Rota de Login: se o utilizador já estiver autenticado, redireciona para o dashboard */}
+          {/* Rota de Login */}
           <Route 
             path="/login" 
             element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} 
@@ -38,9 +39,7 @@ function App() {
           <Route path="/games/:gameId" element={<ProtectedRoute><GameDetailPage /></ProtectedRoute>} />
           <Route path="/predictions" element={<ProtectedRoute><PredictionsPage /></ProtectedRoute>} />
 
-
           {/* --- Rotas de Administração Agrupadas --- */}
-          {/* A rota pai /admin é protegida pela AdminRoute e renderiza o AdminLayout */}
           <Route 
             path="/admin" 
             element={
@@ -49,10 +48,11 @@ function App() {
               </AdminRoute>
             }
           >
-            {/* As rotas filhas são renderizadas dentro do <Outlet /> do AdminLayout */}
+            {/* As rotas filhas são renderizadas dentro do <Outlet/> do AdminLayout */}
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="users/:userId" element={<AdminUserDetailPage />} />
             <Route path="plans" element={<AdminPlansPage />} />
+            <Route path="plans/:roleId" element={<AdminPlanDetailPage />} />
             <Route path="tasks" element={<AdminTasksPage />} />
           </Route>
           

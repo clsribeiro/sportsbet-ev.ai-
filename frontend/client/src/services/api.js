@@ -1,122 +1,81 @@
 import axios from 'axios';
 
 // Cria uma instância do axios com configurações base.
-// Isso nos permite definir a URL base da nossa API em um único lugar.
 const api = axios.create({
   baseURL: 'http://192.168.100.169:8000/api/v1', // Use o IP do seu servidor Debian
 });
 
-/**
- * Função para realizar o login do usuário.
- * @param {string} email - O email do usuário (enviado como username).
- * @param {string} password - A senha do usuário.
- * @returns {Promise<object>} - A resposta da API com o token.
- */
+// --- Funções de Autenticação e Utilizador ---
+
 export const login = async (email, password) => {
-  // O endpoint de login espera dados de formulário (x-www-form-urlencoded).
-  // Criamos um objeto URLSearchParams para formatar os dados corretamente.
   const params = new URLSearchParams();
   params.append('username', email);
   params.append('password', password);
-
-  // Faz a requisição POST para o endpoint de login.
   const response = await api.post('/auth/login', params, {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
   });
-  return response.data; // Retorna os dados da resposta (ex: { access_token, token_type })
+  return response.data;
 };
 
-/**
- * Função para registrar um novo usuário.
- * @param {object} userData - Objeto com email, password, full_name.
- * @returns {Promise<object>} - A resposta da API com os dados do usuário criado.
- */
 export const register = async (userData) => {
-  // O endpoint de registro espera um corpo JSON.
   const response = await api.post('/users/', userData);
   return response.data;
 };
 
-/**
- * Função para buscar os dados do usuário logado.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<object>} - A resposta da API com os dados do usuário.
- */
 export const getMe = async (token) => {
   const response = await api.get('/users/me', {
-    headers: {
-      Authorization: `Bearer ${token}`, // Envia o token no cabeçalho de autorização
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-/**
- * Busca a lista de jogos do dia.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<Array>} - Uma lista de jogos.
- */
+// --- Funções de Dados (Jogos e Previsões) ---
+
 export const getGames = async (token) => {
   const response = await api.get('/games/', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-/**
- * Busca os detalhes de um jogo específico.
- * @param {string} token - O token JWT de acesso.
- * @param {number} gameId - O ID do jogo.
- * @returns {Promise<object>} - Os detalhes do jogo.
- */
 export const getGameDetails = async (token, gameId) => {
   const response = await api.get(`/games/${gameId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-/**
- * Busca a lista de todos os Planos (Roles). Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<Array>} - Uma lista de planos (roles).
- */
+export const generatePrediction = async (token, gameId) => {
+  const response = await api.post(`/games/${gameId}/predict`, {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const getPredictions = async (token) => {
+  const response = await api.get('/predictions/', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+
+// --- Funções de ADMINISTRAÇÃO ---
+
+export const runPreAnalysisTask = async (token) => {
+  const response = await api.post('/admin/tasks/run-pre-analysis', {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
 export const getRoles = async (token) => {
   const response = await api.get('/admin/roles/', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-/**
- * Busca a lista de todas as Permissões. Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<Array>} - Uma lista de permissões.
- */
-export const getPermissions = async (token) => {
-  const response = await api.get('/admin/permissions/', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
-// ... (funções existentes) ...
-
-/**
- * Cria um novo Plano (Role). Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @param {object} roleData - Objeto com os dados do novo plano (name, display_name, description).
- * @returns {Promise<object>} - O plano recém-criado.
- */
 export const createRole = async (token, roleData) => {
   const response = await api.post('/admin/roles/', roleData, {
     headers: {
@@ -126,154 +85,46 @@ export const createRole = async (token, roleData) => {
   return response.data;
 };
 
-// ... (funções existentes) ...
-
-/**
- * Busca os detalhes de um Plano (Role) específico, incluindo as suas permissões.
- * @param {string} token - O token JWT de acesso.
- * @param {number} roleId - O ID do plano.
- * @returns {Promise<object>} - Os detalhes do plano.
- */
 export const getRoleDetails = async (token, roleId) => {
   const response = await api.get(`/admin/roles/${roleId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-/**
- * Atualiza as permissões de um Plano (Role).
- * @param {string} token - O token JWT de acesso.
- * @param {number} roleId - O ID do plano a ser atualizado.
- * @param {Array<number>} permissionIds - Uma lista com os IDs das novas permissões.
- * @returns {Promise<object>} - O plano atualizado.
- */
+export const getPermissions = async (token) => {
+  const response = await api.get('/admin/permissions/', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
 export const updateRolePermissions = async (token, roleId, permissionIds) => {
   const response = await api.put(`/admin/roles/${roleId}/permissions`, 
-    { permission_ids: permissionIds }, // O corpo da requisição
+    { permission_ids: permissionIds },
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     }
   );
   return response.data;
 };
 
-// ... (funções existentes) ...
-
-/**
- * Busca a lista de todos os utilizadores. Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<Array>} - Uma lista de utilizadores.
- */
 export const getUsers = async (token) => {
   const response = await api.get('/admin/users/', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 };
 
-/**
- * Busca os detalhes de um utilizador específico (para obter os seus roles). Requer privilégios de admin.
- * Embora não tenhamos criado um endpoint específico para detalhes do utilizador (poderíamos),
- * por agora, vamos obter os detalhes do utilizador a partir da lista geral.
- * Se quiséssemos um endpoint dedicado, seria GET /admin/users/{user_id}
- */
-
-/**
- * Atualiza os planos (roles) de um utilizador. Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @param {string} userId - O ID do utilizador a ser atualizado.
- * @param {Array<number>} roleIds - Uma lista com os IDs dos novos planos.
- * @returns {Promise<object>} - O utilizador atualizado.
- */
 export const updateUserRoles = async (token, userId, roleIds) => {
   const response = await api.put(`/admin/users/${userId}/roles`,
-    { role_ids: roleIds }, // O corpo da requisição
+    { role_ids: roleIds },
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     }
   );
   return response.data;
 };
 
-/**
- * Busca os detalhes de um utilizador específico pelo seu ID. Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @param {string} userId - O ID do utilizador.
- * @returns {Promise<object>} - Os detalhes do utilizador, incluindo os seus planos (roles).
- */
-export const getUserDetails = async (token, userId) => {
-  // Nota: Não criámos um endpoint dedicado /admin/users/{id} porque a nossa lista de
-  // utilizadores já retorna os roles. Numa app maior, poderíamos criar um.
-  // Por agora, esta função é um placeholder para o conceito.
-  // A lógica real estará na página, que irá filtrar da lista de utilizadores.
-  // Ou, podemos simplesmente buscar a lista completa novamente se ela for pequena.
-  // Vamos usar a abordagem de filtrar os dados já existentes na página de detalhes.
-  // Se fosse para chamar a API, seria assim:
-  // const response = await api.get(`/admin/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
-  // return response.data;
-  console.warn("getUserDetails não está a chamar a API, use os dados passados por state.");
-  return Promise.resolve({}); // Retorna uma promessa vazia, pois a lógica será diferente.
-};
 
-// ... (funções existentes) ...
-
-/**
- * Pede ao backend para gerar ou obter a previsão de IA para um jogo.
- * @param {string} token - O token JWT de acesso.
- * @param {number} gameId - O ID do jogo.
- * @returns {Promise<object>} - Os dados da previsão.
- */
-export const generatePrediction = async (token, gameId) => {
-  const response = await api.post(`/games/${gameId}/predict`, 
-    {}, // O corpo do POST pode ser vazio, conforme o nosso endpoint
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  return response.data;
-};
-
-/**
- * Aciona a tarefa de pré-análise no backend. Requer privilégios de admin.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<object>} - A resposta da API sobre o estado da tarefa.
- */
-export const runPreAnalysisTask = async (token) => {
-  const response = await api.post('/admin/tasks/run-pre-analysis', 
-    {}, // Corpo do POST pode ser vazio
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-  return response.data;
-};
-
-/**
- * Busca a lista de previsões mais recentes.
- * @param {string} token - O token JWT de acesso.
- * @returns {Promise<Array>} - Uma lista de previsões com os dados dos jogos.
- */
-export const getPredictions = async (token) => {
-  const response = await api.get('/predictions/', {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
-
-// Podemos adicionar outras funções de API aqui no futuro...
 export default api;
