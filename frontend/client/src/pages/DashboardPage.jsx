@@ -1,79 +1,86 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getGames } from '../services/api';
-import { Link } from 'react-router-dom'; // Importe o componente Link
+import { Link } from 'react-router-dom';
+import './Dashboard.css'; // Importa o nosso novo ficheiro de estilos
+
+// Componente para um único jogo
+const GameCard = ({ game }) => (
+  <Link to={`/games/${game.id}`} className="game-card-link">
+    <div className="game-card">
+      <div className="game-card-teams">
+        <img src={game.home_team.logo_url} alt={game.home_team.name} className="team-logo" />
+        <span>{game.home_team.name}</span>
+        <span className="vs-separator">vs</span>
+        <span>{game.away_team.name}</span>
+        <img src={game.away_team.logo_url} alt={game.away_team.name} className="team-logo" />
+      </div>
+      <div className="game-card-info">
+        <span>{game.home_team.league}</span>
+        <span>{new Date(game.game_time).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+      </div>
+    </div>
+  </Link>
+);
+
+// Componente para uma secção de jogos (ex: Hoje, Ao Vivo)
+const GameSection = ({ title, games, loading, error }) => (
+  <section className="game-section">
+    <h2>{title}</h2>
+    {loading && <p>A carregar jogos...</p>}
+    {error && <p className="error-message">{error}</p>}
+    {!loading && !error && (
+      <div className="games-grid">
+        {games.length > 0 ? (
+          games.map(game => <GameCard key={game.id} game={game} />)
+        ) : (
+          <p>Nenhum jogo encontrado para esta categoria.</p>
+        )}
+      </div>
+    )}
+  </section>
+);
+
 
 const DashboardPage = () => {
-  const { user, logout, token } = useAuth();
-  const [games, setGames] = useState([]);
-  const [loadingGames, setLoadingGames] = useState(true);
-  const [error, setError] = useState('');
+  const { user } = useAuth(); // Já não precisamos do logout/token aqui diretamente
+  
+  // Estados para cada categoria de jogos
+  const [liveGames, setLiveGames] = useState({ data: [], loading: true, error: '' });
+  const [todayGames, setTodayGames] = useState({ data: [], loading: true, error: '' });
+  const [upcomingGames, setUpcomingGames] = useState({ data: [], loading: true, error: '' });
+
+  const { token } = useAuth();
 
   useEffect(() => {
-    if (token) {
-      const fetchGames = async () => {
+    const fetchGamesData = async (filter, setter) => {
+      if (token) {
         try {
-          setLoadingGames(true);
-          const gamesData = await getGames(token);
-          setGames(gamesData);
+          setter(prev => ({ ...prev, loading: true, error: '' }));
+          const gamesData = await getGames(token, filter);
+          setter({ data: gamesData, loading: false, error: '' });
         } catch (err) {
-          console.error("Erro ao buscar jogos:", err);
-          setError("Não foi possível carregar os jogos.");
-        } finally {
-          setLoadingGames(false);
+          console.error(`Erro ao buscar jogos (${filter}):`, err);
+          setter({ data: [], loading: false, error: `Não foi possível carregar os jogos (${filter}).` });
         }
-      };
-      fetchGames();
-    }
+      }
+    };
+    
+    // Busca os dados para todas as secções
+    fetchGamesData('live', setLiveGames);
+    fetchGamesData('today', setTodayGames);
+    fetchGamesData('upcoming', setUpcomingGames);
+
   }, [token]);
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Dashboard</h1>
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <Link to="/predictions" style={{ padding: '10px', background: '#007bff', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
-            Ver Dicas da IA
-          </Link>
-          {user && user.is_superuser && (
-            <Link to="/admin/users" style={{ padding: '10px', background: '#e53935', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
-              Painel de Admin
-            </Link>
-          )}
-        </div>
-        <button onClick={logout} style={{ padding: '10px' }}>
-          Sair (Logout)
-        </button>
-      </div>
-      {user ? (
-        <p>Bem-vindo, <strong>{user.full_name || user.email}</strong>!</p>
-      ) : (
-        <p>A carregar dados do utilizador...</p>
-      )}
-
-      <hr style={{ margin: '20px 0' }} />
-
-      <h2>Próximos Jogos</h2>
-      {loadingGames ? (
-        <p>A carregar jogos...</p>
-      ) : error ? (
-        <p style={{ color: 'red' }}>{error}</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          {games.map((game) => (
-            // Envolva o item da lista com um Link
-            <Link to={`/games/${game.id}`} key={game.id} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <li style={{ border: '1px solid #333', padding: '15px', marginBottom: '10px', borderRadius: '8px', cursor: 'pointer' }}>
-                <div style={{ fontWeight: 'bold', fontSize: '1.2em' }}>
-                  <span>{game.home_team.name}</span> vs <span>{game.away_team.name}</span>
-                </div>
-                <div>Liga: {game.home_team.league}</div>
-                <div>Data: {new Date(game.game_time).toLocaleString('pt-PT')}</div>
-              </li>
-            </Link>
-          ))}
-        </ul>
-      )}
+    <div className="dashboard-container">
+      <h1>Dashboard Principal</h1>
+      <p>Bem-vindo de volta, <strong>{user?.full_name || user?.email}</strong>! Veja os jogos em destaque.</p>
+      
+      <GameSection title="Ao Vivo" games={liveGames.data} loading={liveGames.loading} error={liveGames.error} />
+      <GameSection title="Jogos de Hoje" games={todayGames.data} loading={todayGames.loading} error={todayGames.error} />
+      <GameSection title="Próximos na Semana" games={upcomingGames.data} loading={upcomingGames.loading} error={upcomingGames.error} />
     </div>
   );
 };

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Cria uma instância do axios com configurações base.
 const api = axios.create({
-  baseURL: 'http://192.168.100.169:8000/api/v1', // Use o IP do seu servidor Debian
+  baseURL: 'http://192.168.100.169:8000/api/v1',
 });
 
 // --- Funções de Autenticação e Utilizador ---
@@ -31,9 +31,10 @@ export const getMe = async (token) => {
 
 // --- Funções de Dados (Jogos e Previsões) ---
 
-export const getGames = async (token) => {
+export const getGames = async (token, timeFilter = 'upcoming') => {
   const response = await api.get('/games/', {
     headers: { Authorization: `Bearer ${token}` },
+    params: { time_filter: timeFilter }
   });
   return response.data;
 };
@@ -76,6 +77,7 @@ export const getRoles = async (token) => {
   return response.data;
 };
 
+// --- FUNÇÃO RESTAURADA ---
 export const createRole = async (token, roleData) => {
   const response = await api.post('/admin/roles/', roleData, {
     headers: {
