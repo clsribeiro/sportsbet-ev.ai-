@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Cria uma instância do axios com configurações base.
 const api = axios.create({
-  baseURL: 'http://192.168.100.169:8000/api/v1',
+  baseURL: 'http://192.168.100.169:8000/api/v1', // Use o IP do seu servidor Debian
 });
 
 // --- Funções de Autenticação e Utilizador ---
@@ -24,6 +24,20 @@ export const register = async (userData) => {
 
 export const getMe = async (token) => {
   const response = await api.get('/users/me', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const updateMe = async (token, userData) => {
+  const response = await api.put('/users/me', userData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const updatePassword = async (token, passwordData) => {
+  const response = await api.post('/users/me/password', passwordData, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
@@ -60,6 +74,26 @@ export const getPredictions = async (token) => {
   return response.data;
 };
 
+// --- Funções do Bet Tracker ---
+
+export const getUserBets = async (token) => {
+  const response = await api.get('/bets/', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
+export const createBet = async (token, betData) => {
+  const response = await api.post('/bets/', betData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
+
 
 // --- Funções de ADMINISTRAÇÃO ---
 
@@ -77,7 +111,6 @@ export const getRoles = async (token) => {
   return response.data;
 };
 
-// --- FUNÇÃO RESTAURADA ---
 export const createRole = async (token, roleData) => {
   const response = await api.post('/admin/roles/', roleData, {
     headers: {

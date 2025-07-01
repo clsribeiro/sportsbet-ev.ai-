@@ -1,0 +1,100 @@
+.bet-tracker-container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.form-container {
+  background-color: #2a2a2a;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  margin-bottom: 2.5rem;
+  border: 1px solid #333;
+}
+
+.bet-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.bet-form input {
+  width: 100%;
+  padding: 0.8em;
+  font-size: 1em;
+  background-color: #242424;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: white;
+  box-sizing: border-box;
+}
+
+.bet-form button {
+  background-color: #646cff;
+  color: white;
+  border: none;
+  height: 45px; /* Alinha com a altura dos inputs */
+}
+.bet-form button:hover {
+  background-color: #535bf2;
+}
+
+.bets-list-container h2 {
+  margin-top: 0;
+}
+
+.bets-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.bet-card {
+  background-color: #2a2a2a;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #333;
+  display: flex;
+  flex-direction: column;
+}
+
+.bet-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #444;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bet-card-header h3 {
+  margin: 0;
+  font-size: 1.1em;
+}
+
+.bet-status {
+  padding: 0.2em 0.6em;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-pending { background-color: #4a4a4a; color: #f0f0f0; }
+.status-won { background-color: #004d40; color: #b2dfdb; }
+.status-lost { background-color: #b71c1c; color: #ffcdd2; }
+.status-void { background-color: #424242; color: #bdbdbd; }
+
+.bet-selection {
+  font-size: 1.4em;
+  font-weight: bold;
+  margin: 0.5rem 0 1rem 0;
+  flex-grow: 1;
+}
+
+.bet-card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+  color: #aaa;
+}

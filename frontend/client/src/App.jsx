@@ -5,14 +5,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
-import MainLayout from './components/MainLayout'; // Layout principal do utilizador
-import AdminLayout from './components/AdminLayout'; // Layout da área de admin
+import MainLayout from './components/MainLayout';
+import AdminLayout from './components/AdminLayout';
 
 // Importação de Todas as Páginas
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import GameDetailPage from './pages/GameDetailPage';
 import PredictionsPage from './pages/PredictionsPage';
+import ProfilePage from './pages/ProfilePage';
+import BetTrackerPage from './pages/BetTrackerPage'; // Importa a nova página
 import AdminPlansPage from './pages/AdminPlansPage';
 import AdminUserDetailPage from './pages/AdminUserDetailPage';
 import AdminUsersPage from './pages/AdminUsersPage';
@@ -28,7 +30,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Rota de Login (fora de qualquer layout) */}
+        {/* Rota de Login */}
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} 
@@ -42,14 +44,15 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="games/:gameId" element={<GameDetailPage />} />
           <Route path="predictions" element={<PredictionsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="bets" element={<BetTrackerPage />} /> {/* ROTA ADICIONADA */}
         </Route>
 
-        {/* --- Rotas de Administração (dentro do AdminLayout) --- */}
+        {/* --- Rotas de Administração --- */}
         <Route 
           path="/admin" 
           element={<AdminRoute><AdminLayout /></AdminRoute>}
         >
-          {/* Redireciona /admin para /admin/users por defeito */}
           <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="users/:userId" element={<AdminUserDetailPage />} />

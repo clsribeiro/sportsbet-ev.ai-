@@ -1,15 +1,16 @@
-from app.db.base_class import Base # Importante para que os modelos usem a mesma Base
+from app.db.base_class import Base
 
-# Importe os modelos de autenticação existentes
+# Modelos de autenticação
 from .user import User, user_role_association_table
 from .role import Role, role_permission_association_table
 from .permission import Permission
 from .user_feature_preference import UserFeaturePreference
 
-# Importe os modelos de desporto existentes
+# Modelos de desporto
 from .team import Team
 from .game import Game, GameStatus
 from .league import League
-
-# --- CORREÇÃO AQUI: Importe o novo modelo de Previsão ---
 from .prediction import Prediction
+
+# Novo modelo de aposta
+from .bet import Bet, BetStatus

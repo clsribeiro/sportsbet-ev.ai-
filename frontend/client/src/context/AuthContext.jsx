@@ -1,57 +1,59 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { login as apiLogin, getMe } from '../services/api'; // Importa as nossas funções da API
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { getMe, login as apiLogin } from '../services/api';
 
-// 1. Criar o Contexto
 const AuthContext = createContext(null);
 
-// 2. Criar o Provedor do Contexto (o componente que vai gerir o estado)
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem('authToken')); // Lê o token do localStorage ao iniciar
+  const [token, setToken] = useState(localStorage.getItem('authToken'));
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!token);
   const [loading, setLoading] = useState(true);
 
-  // Efeito para carregar os dados do utilizador se um token existir no início
-  useEffect(() => {
-    const loadUserFromToken = async () => {
-      if (token) {
-        try {
-          const userData = await getMe(token);
-          setUser(userData);
-          setIsAuthenticated(true);
-        } catch (error) {
-          console.error("Falha ao carregar utilizador a partir do token", error);
-          // Limpa o token se for inválido
-          localStorage.removeItem('authToken');
-          setToken(null);
-          setIsAuthenticated(false);
-        }
+  const loadUserFromToken = useCallback(async () => {
+    if (token) {
+      try {
+        const userData = await getMe(token);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } catch (error) {
+        console.error("Falha ao carregar utilizador a partir do token", error);
+        localStorage.removeItem('authToken');
+        setToken(null);
+        setUser(null);
+        setIsAuthenticated(false);
       }
-      setLoading(false);
-    };
-    loadUserFromToken();
-  }, [token]); // Executa sempre que o token mudar
+    }
+    setLoading(false);
+  }, [token]);
 
-  // Função de login que será usada pelos componentes
+  useEffect(() => {
+    loadUserFromToken();
+  }, [loadUserFromToken]);
+
   const login = async (email, password) => {
     const data = await apiLogin(email, password);
     if (data.access_token) {
-      localStorage.setItem('authToken', data.access_token); // Guarda o token no localStorage
+      localStorage.setItem('authToken', data.access_token);
       setToken(data.access_token);
       setIsAuthenticated(true);
       return data;
     }
   };
 
-  // Função de logout
   const logout = () => {
     localStorage.removeItem('authToken');
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
   };
+  
+  // --- FUNÇÃO MODIFICADA ---
+  // Tornamos a função async e garantimos que ela espera pela conclusão
+  const refreshUser = useCallback(async () => {
+    setLoading(true);
+    await loadUserFromToken();
+  }, [loadUserFromToken]);
 
-  // Valor que será fornecido a todos os componentes filhos
   const value = {
     token,
     user,
@@ -59,6 +61,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout,
+    refreshUser, // Adiciona a função ao contexto
   };
 
   return (
@@ -68,7 +71,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// 3. Criar um Hook customizado para usar o contexto mais facilmente
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {

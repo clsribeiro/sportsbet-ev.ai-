@@ -5,15 +5,17 @@ import { useAuth } from '../context/AuthContext';
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
 
-  const navLinkStyles = ({ isActive }) => {
-    return {
-      fontWeight: isActive ? 'bold' : 'normal',
-      textDecoration: 'none',
-      color: isActive ? '#818cf8' : 'white',
-      padding: '10px 15px',
-      borderRadius: '4px',
-      transition: 'background-color 0.2s',
-    };
+  const navLinkStyles = ({ isActive }) => ({
+    fontWeight: isActive ? 'bold' : 'normal',
+    textDecoration: 'none',
+    color: isActive ? '#818cf8' : 'white',
+    padding: '10px 15px',
+    borderRadius: '4px',
+  });
+
+  const getFirstName = () => {
+    if (!user) return '';
+    return user.full_name ? user.full_name.split(' ')[0] : user.email.split('@')[0];
   };
 
   return (
@@ -33,6 +35,7 @@ const Navbar = () => {
           <>
             <NavLink to="/" style={navLinkStyles}>Dashboard</NavLink>
             <NavLink to="/predictions" style={navLinkStyles}>Dicas da IA</NavLink>
+            <NavLink to="/bets" style={navLinkStyles}>Bet Tracker</NavLink> {/* LINK ADICIONADO */}
             
             {user && user.is_superuser && (
               <NavLink to="/admin/users" style={navLinkStyles}>Admin</NavLink>
@@ -40,9 +43,14 @@ const Navbar = () => {
 
             <span style={{ color: '#ccc', margin: '0 10px' }}>|</span>
             
-            <span style={{ color: 'white', marginRight: '15px' }}>
-              Olá, {user ? (user.full_name || user.email) : ''}
-            </span>
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ color: 'white', fontWeight: 'bold' }}>{getFirstName()}</span>
+              <div>
+                <Link to="/profile" style={{ fontSize: '0.8em', color: '#aaa', textDecoration: 'underline' }}>
+                  editar perfil
+                </Link>
+              </div>
+            </div>
 
             <button onClick={logout} style={{ 
               padding: '8px 15px', 
@@ -50,7 +58,8 @@ const Navbar = () => {
               color: '#ff8a80', 
               border: '1px solid #ff8a80',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              marginLeft: '15px'
             }}>
               Sair
             </button>

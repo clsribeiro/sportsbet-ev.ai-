@@ -1,5 +1,5 @@
 # Modelos de autenticação
-from .user import UserBase, UserCreate, UserUpdate, UserRead, UserReadWithRoles, UserUpdateRoles
+from .user import UserBase, UserCreate, UserUpdate, UserRead, UserReadWithRoles, UserUpdateRoles, UserPasswordUpdate
 from .token import Token
 
 # Modelos de Roles/Planos e Permissões
@@ -11,5 +11,8 @@ from .team import TeamBase, TeamCreate, TeamUpdate, TeamRead
 from .game import GameBase, GameCreate, GameUpdate, GameRead
 from .league import LeagueBase, LeagueCreate, LeagueRead
 
-# Modelos de Previsão (agora com todos os schemas corretos)
+# Modelos de Previsão
 from .prediction import PredictionBase, PredictionCreate, PredictionRead, PredictionReadWithGame
+
+# Novos schemas de aposta
+from .bet import BetBase, BetCreate, BetUpdate, BetRead
