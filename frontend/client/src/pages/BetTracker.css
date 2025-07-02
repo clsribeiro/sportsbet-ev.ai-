@@ -33,7 +33,7 @@
   background-color: #646cff;
   color: white;
   border: none;
-  height: 45px; /* Alinha com a altura dos inputs */
+  height: 45px;
 }
 .bet-form button:hover {
   background-color: #535bf2;
@@ -97,4 +97,42 @@
   justify-content: space-between;
   font-size: 0.9em;
   color: #aaa;
+}
+
+/* --- NOVOS ESTILOS --- */
+.bet-card-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #444;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-button {
+  flex-grow: 1;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.action-button:hover {
+  opacity: 0.8;
+}
+
+.action-button.won {
+  background-color: #4caf50;
+  color: white;
+}
+
+.action-button.lost {
+  background-color: #f44336;
+  color: white;
+}
+
+.action-button.void {
+  background-color: #616161;
+  color: white;
 }

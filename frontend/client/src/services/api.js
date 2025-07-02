@@ -94,6 +94,15 @@ export const createBet = async (token, betData) => {
   return response.data;
 };
 
+export const updateBet = async (token, betId, status) => {
+  const response = await api.put(`/bets/${betId}`, 
+    { status: status },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
+};
 
 // --- Funções de ADMINISTRAÇÃO ---
 
