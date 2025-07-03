@@ -11,7 +11,7 @@ from app.api.v1.endpoints import (
     predictions,
     admin_users,
     admin_tasks,
-    bets  # Importa o novo router de apostas
+    bets
 )
 
 api_router_v1 = APIRouter()
@@ -22,10 +22,11 @@ api_router_v1.include_router(users.router, prefix="/users", tags=["Utilizadores"
 api_router_v1.include_router(health.router, prefix="/health", tags=["Health Check"])
 api_router_v1.include_router(games.router, prefix="/games", tags=["Jogos"])
 api_router_v1.include_router(predictions.router, prefix="/predictions", tags=["Previsões"])
-api_router_v1.include_router(bets.router, prefix="/bets", tags=["Apostas (Bet Tracker)"]) # Adiciona o novo router
+api_router_v1.include_router(bets.router, prefix="/bets", tags=["Apostas (Bet Tracker)"])
 
 # Rotas de Administração
 api_router_v1.include_router(roles.router, prefix="/admin/roles", tags=["Admin - Gestão de Planos"])
 api_router_v1.include_router(permissions.router, prefix="/admin/permissions", tags=["Admin - Gestão de Permissões"])
 api_router_v1.include_router(admin_users.router, prefix="/admin/users", tags=["Admin - Gestão de Utilizadores"])
+# O router admin_tasks já está incluído, garantimos que o ficheiro está atualizado
 api_router_v1.include_router(admin_tasks.router, prefix="/admin/tasks", tags=["Admin - Tarefas"])

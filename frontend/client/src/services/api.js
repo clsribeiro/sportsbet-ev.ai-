@@ -37,10 +37,9 @@ export const updateMe = async (token, userData) => {
 };
 
 export const updatePassword = async (token, passwordData) => {
-  const response = await api.post('/users/me/password', passwordData, {
+  await api.post('/users/me/password', passwordData, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  return response.data;
 };
 
 // --- Funções de Dados (Jogos e Previsões) ---
@@ -104,12 +103,29 @@ export const updateBet = async (token, betId, status) => {
   return response.data;
 };
 
+export const deleteBet = async (token, betId) => {
+  await api.delete(`/bets/${betId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};
+
+
 // --- Funções de ADMINISTRAÇÃO ---
 
 export const runPreAnalysisTask = async (token) => {
   const response = await api.post('/admin/tasks/run-pre-analysis', {}, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  return response.data;
+};
+
+export const sendBroadcastTest = async (token, message) => {
+  const response = await api.post('/admin/tasks/broadcast-test', 
+    { message: message },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   return response.data;
 };
 

@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
+import NotificationContainer from './components/NotificationContainer';
 
 // Importação de Todas as Páginas
 import LoginPage from './pages/LoginPage';
@@ -14,7 +15,7 @@ import DashboardPage from './pages/DashboardPage';
 import GameDetailPage from './pages/GameDetailPage';
 import PredictionsPage from './pages/PredictionsPage';
 import ProfilePage from './pages/ProfilePage';
-import BetTrackerPage from './pages/BetTrackerPage'; // Importa a nova página
+import BetTrackerPage from './pages/BetTrackerPage';
 import AdminPlansPage from './pages/AdminPlansPage';
 import AdminUserDetailPage from './pages/AdminUserDetailPage';
 import AdminUsersPage from './pages/AdminUsersPage';
@@ -29,14 +30,15 @@ function App() {
 
   return (
     <Router>
+      {/* O NotificationContainer fica fora do Routes para ser exibido em todas as páginas */}
+      <NotificationContainer />
+      
       <Routes>
-        {/* Rota de Login */}
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} 
         />
         
-        {/* --- Rotas Principais do Utilizador (dentro do MainLayout) --- */}
         <Route 
           path="/" 
           element={<ProtectedRoute><MainLayout /></ProtectedRoute>}
@@ -45,10 +47,9 @@ function App() {
           <Route path="games/:gameId" element={<GameDetailPage />} />
           <Route path="predictions" element={<PredictionsPage />} />
           <Route path="profile" element={<ProfilePage />} />
-          <Route path="bets" element={<BetTrackerPage />} /> {/* ROTA ADICIONADA */}
+          <Route path="bets" element={<BetTrackerPage />} />
         </Route>
 
-        {/* --- Rotas de Administração --- */}
         <Route 
           path="/admin" 
           element={<AdminRoute><AdminLayout /></AdminRoute>}
@@ -60,7 +61,6 @@ function App() {
           <Route path="plans/:roleId" element={<AdminPlanDetailPage />} />
           <Route path="tasks" element={<AdminTasksPage />} />
         </Route>
-        
       </Routes>
     </Router>
   );

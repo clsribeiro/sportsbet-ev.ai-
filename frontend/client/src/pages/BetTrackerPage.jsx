@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUserBets, createBet, updateBet } from '../services/api';
+import { getUserBets, createBet, updateBet, deleteBet } from '../services/api';
 import './BetTracker.css';
 
 const BetTrackerPage = () => {
@@ -22,7 +22,6 @@ const BetTrackerPage = () => {
         const betsData = await getUserBets(token);
         setBets(betsData);
       } catch (err) {
-        console.error("Erro ao buscar apostas:", err);
         setError("Não foi possível carregar as suas apostas.");
       } finally {
         setLoading(false);
@@ -30,9 +29,7 @@ const BetTrackerPage = () => {
     }
   }, [token]);
 
-  useEffect(() => {
-    fetchBets();
-  }, [fetchBets]);
+  useEffect(() => { fetchBets(); }, [fetchBets]);
 
   const handleAddBet = async (e) => {
     e.preventDefault();
@@ -42,17 +39,11 @@ const BetTrackerPage = () => {
       return;
     }
     try {
-      const betData = {
-        market_name: market,
-        selection: selection,
-        odds: parseFloat(odds),
-        stake: parseFloat(stake),
-      };
+      const betData = { market_name: market, selection: selection, odds: parseFloat(odds), stake: parseFloat(stake) };
       await createBet(token, betData);
       setMarket(''); setSelection(''); setOdds(''); setStake('');
       fetchBets(); 
     } catch (err) {
-      console.error("Erro ao adicionar aposta:", err);
       setFormError(err.response?.data?.detail || 'Ocorreu um erro ao adicionar a aposta.');
     }
   };
@@ -60,15 +51,21 @@ const BetTrackerPage = () => {
   const handleUpdateStatus = async (betId, newStatus) => {
     try {
       await updateBet(token, betId, newStatus);
-      // Atualiza a lista localmente para uma resposta visual imediata
-      setBets(prevBets => 
-        prevBets.map(bet => 
-          bet.id === betId ? { ...bet, status: newStatus } : bet
-        )
-      );
+      fetchBets(); // Busca a lista completa para garantir consistência
     } catch (err) {
-      console.error("Erro ao atualizar status da aposta:", err);
       alert("Não foi possível atualizar o status da aposta.");
+    }
+  };
+
+  const handleDeleteBet = async (betId) => {
+    // Usamos um prompt de confirmação simples do navegador
+    if (window.confirm("Tem a certeza de que quer apagar esta aposta? Esta ação não pode ser desfeita.")) {
+      try {
+        await deleteBet(token, betId);
+        fetchBets();
+      } catch (err) {
+        alert("Não foi possível apagar a aposta.");
+      }
     }
   };
 
@@ -84,12 +81,23 @@ const BetTrackerPage = () => {
   return (
     <div className="bet-tracker-container">
       <h1>O Meu Registo de Apostas (Bet Tracker)</h1>
-      
-      {/* ... (formulário existente) ... */}
+      <div className="form-container">
+        <h2>Adicionar Nova Aposta</h2>
+        <form onSubmit={handleAddBet} className="bet-form">
+          <input type="text" placeholder="Mercado (ex: Vencedor do Jogo)" value={market} onChange={(e) => setMarket(e.target.value)} />
+          <input type="text" placeholder="Seleção (ex: Flamengo)" value={selection} onChange={(e) => setSelection(e.target.value)} />
+          <input type="number" step="0.01" placeholder="Odds (ex: 1.85)" value={odds} onChange={(e) => setOdds(e.target.value)} />
+          <input type="number" step="0.01" placeholder="Valor (Stake)" value={stake} onChange={(e) => setStake(e.target.value)} />
+          <button type="submit">Adicionar Aposta</button>
+        </form>
+        {formError && <p className="error-message">{formError}</p>}
+      </div>
 
       <div className="bets-list-container">
         <h2>As Minhas Apostas</h2>
-        {/* ... (lógica de loading/erro existente) ... */}
+        {loading && <p>A carregar apostas...</p>}
+        {error && <p className="error-message">{error}</p>}
+        {!loading && bets.length === 0 && <p>Ainda não tem nenhuma aposta registada.</p>}
         <div className="bets-list">
           {bets.map(bet => (
             <div key={bet.id} className="bet-card">
@@ -103,14 +111,16 @@ const BetTrackerPage = () => {
                 <span><strong>Stake:</strong> {bet.stake.toFixed(2)}</span>
                 <span><strong>Data:</strong> {new Date(bet.placed_at).toLocaleDateString('pt-PT')}</span>
               </div>
-              {/* --- NOVOS BOTÕES DE AÇÃO --- */}
-              {bet.status === 'pending' && (
-                <div className="bet-card-actions">
-                  <button onClick={() => handleUpdateStatus(bet.id, 'won')} className="action-button won">Ganha</button>
-                  <button onClick={() => handleUpdateStatus(bet.id, 'lost')} className="action-button lost">Perdida</button>
-                  <button onClick={() => handleUpdateStatus(bet.id, 'void')} className="action-button void">Anulada</button>
-                </div>
-              )}
+              <div className="bet-card-actions">
+                {bet.status === 'pending' && (
+                  <>
+                    <button onClick={() => handleUpdateStatus(bet.id, 'won')} className="action-button won">Ganha</button>
+                    <button onClick={() => handleUpdateStatus(bet.id, 'lost')} className="action-button lost">Perdida</button>
+                    <button onClick={() => handleUpdateStatus(bet.id, 'void')} className="action-button void">Anulada</button>
+                  </>
+                )}
+                <button onClick={() => handleDeleteBet(bet.id)} className="action-button delete">Apagar</button>
+              </div>
             </div>
           ))}
         </div>

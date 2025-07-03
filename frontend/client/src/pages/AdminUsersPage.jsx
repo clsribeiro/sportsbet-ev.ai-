@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUsers } from '../services/api';
 import { Link } from 'react-router-dom';
+import './Admin.css'; // Usa o mesmo ficheiro de estilos
 
 const AdminUsersPage = () => {
   const { token } = useAuth();
@@ -28,38 +29,41 @@ const AdminUsersPage = () => {
   }, [token]);
 
   if (loading) return <div>A carregar utilizadores...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '900px', margin: 'auto' }}>
-      <Link to="/">&larr; Voltar ao Dashboard</Link>
-      <h1 style={{ marginTop: '20px' }}>Gestão de Utilizadores</h1>
-
-      <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
+    <div className="admin-page-container">
+      <h1>Gestão de Utilizadores</h1>
+      
+      <table className="admin-table">
         <thead>
-          <tr style={{ borderBottom: '1px solid #444' }}>
-            <th style={{ padding: '8px', textAlign: 'left' }}>Email</th>
-            <th style={{ padding: '8px', textAlign: 'left' }}>Nome Completo</th>
-            <th style={{ padding: '8px', textAlign: 'left' }}>Planos Atuais</th>
-            <th style={{ padding: '8px', textAlign: 'center' }}>Ações</th>
+          <tr>
+            <th>Email</th>
+            <th>Nome Completo</th>
+            <th>Planos Atribuídos</th>
+            <th style={{ textAlign: 'center' }}>Ações</th>
           </tr>
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user.id} style={{ borderBottom: '1px solid #333' }}>
-              <td style={{ padding: '8px' }}>{user.email}</td>
-              <td style={{ padding: '8px' }}>{user.full_name || 'N/A'}</td>
-              <td style={{ padding: '8px' }}>
-                {user.roles.map(role => role.display_name).join(', ') || 'Nenhum'}
+            <tr key={user.id}>
+              <td>{user.email} {user.is_superuser && <span className="admin-badge">Admin</span>}</td>
+              <td>{user.full_name || 'N/A'}</td>
+              <td>
+                {user.roles.length > 0 
+                  ? user.roles.map(role => role.display_name).join(', ')
+                  : 'Nenhum'
+                }
+                <span className="count-badge">{user.roles.length}</span>
               </td>
-              <td style={{ padding: '8px', textAlign: 'center' }}>
-              <Link 
-                to={`/admin/users/${user.id}`}
-                state={{ user: user }} // Passa o objeto completo do utilizador
-                style={{ textDecoration: 'none', color: '#646cff', fontWeight: 'bold' }}
-              >
-                Gerir Planos
-              </Link>
+              <td style={{ textAlign: 'center' }}>
+                <Link 
+                  to={`/admin/users/${user.id}`}
+                  state={{ user: user }}
+                  className="action-link"
+                >
+                  Gerir
+                </Link>
               </td>
             </tr>
           ))}

@@ -99,7 +99,6 @@
   color: #aaa;
 }
 
-/* --- NOVOS ESTILOS --- */
 .bet-card-actions {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -122,17 +121,14 @@
   opacity: 0.8;
 }
 
-.action-button.won {
-  background-color: #4caf50;
-  color: white;
-}
+.action-button.won { background-color: #4caf50; color: white; }
+.action-button.lost { background-color: #f44336; color: white; }
+.action-button.void { background-color: #616161; color: white; }
 
-.action-button.lost {
-  background-color: #f44336;
+.action-button.delete {
+  background-color: #757575;
   color: white;
-}
-
-.action-button.void {
-  background-color: #616161;
-  color: white;
+  margin-left: auto; /* Empurra o botão de apagar para a direita */
+  flex-grow: 0; /* Impede que ele cresça para preencher o espaço */
+  padding: 0.5rem 1rem;
 }
