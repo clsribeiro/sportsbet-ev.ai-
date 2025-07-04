@@ -8,6 +8,7 @@ import AdminRoute from './components/AdminRoute';
 import MainLayout from './components/MainLayout';
 import AdminLayout from './components/AdminLayout';
 import NotificationContainer from './components/NotificationContainer';
+import PermissionProtectedRoute from './components/PermissionProtectedRoute'; // Importa a nova rota protegida
 
 // Importação de Todas as Páginas
 import LoginPage from './pages/LoginPage';
@@ -32,7 +33,7 @@ function App() {
     <Router>
       <NotificationContainer />
       <Routes>
-        {/* Rota de Login (fora de qualquer layout) */}
+        {/* Rota de Login */}
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} 
@@ -45,17 +46,27 @@ function App() {
         >
           <Route index element={<DashboardPage />} />
           <Route path="games/:gameId" element={<GameDetailPage />} />
-          <Route path="predictions" element={<PredictionsPage />} />
+          
+          {/* --- ROTA MODIFICADA --- */}
+          {/* Agora esta rota é protegida por uma permissão específica */}
+          <Route 
+            path="predictions" 
+            element={
+              <PermissionProtectedRoute permission="feature:access_advanced_analysis">
+                <PredictionsPage />
+              </PermissionProtectedRoute>
+            } 
+          />
+          
           <Route path="profile" element={<ProfilePage />} />
           <Route path="bets" element={<BetTrackerPage />} />
         </Route>
 
-        {/* --- Rotas de Administração (dentro do AdminLayout) --- */}
+        {/* --- Rotas de Administração --- */}
         <Route 
           path="/admin" 
           element={<AdminRoute><AdminLayout /></AdminRoute>}
         >
-          {/* Redireciona /admin para /admin/users por defeito */}
           <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="users/:userId" element={<AdminUserDetailPage />} />

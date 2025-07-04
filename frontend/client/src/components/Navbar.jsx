@@ -1,9 +1,13 @@
 import React from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useHasPermission } from '../hooks/useHasPermission'; // Importa o nosso novo hook de permissões
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  
+  // Verifica se o utilizador tem a permissão para ver as dicas da IA
+  const canSeeTips = useHasPermission('feature:access_advanced_analysis');
 
   const navLinkStyles = ({ isActive }) => ({
     fontWeight: isActive ? 'bold' : 'normal',
@@ -34,7 +38,13 @@ const Navbar = () => {
         {isAuthenticated ? (
           <>
             <NavLink to="/" style={navLinkStyles}>Dashboard</NavLink>
-            <NavLink to="/predictions" style={navLinkStyles}>Dicas da IA</NavLink>
+            
+            {/* --- LINK CONDICIONAL --- */}
+            {/* O link para "Dicas da IA" só aparece se o utilizador tiver a permissão */}
+            {canSeeTips && (
+              <NavLink to="/predictions" style={navLinkStyles}>Dicas da IA</NavLink>
+            )}
+
             <NavLink to="/bets" style={navLinkStyles}>Bet Tracker</NavLink>
             
             {user && user.is_superuser && (

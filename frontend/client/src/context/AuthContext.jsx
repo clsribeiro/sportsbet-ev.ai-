@@ -6,8 +6,11 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('authToken'));
   const [user, setUser] = useState(null);
+  // --- NOVA LÓGICA DE PERMISSÕES ---
+  const [permissions, setPermissions] = useState(new Set());
   const [isAuthenticated, setIsAuthenticated] = useState(!!token);
   const [loading, setLoading] = useState(true);
+  
   const [notifications, setNotifications] = useState([]);
   const websocket = useRef(null);
 
@@ -19,52 +22,29 @@ export const AuthProvider = ({ children }) => {
     }, 7000);
   };
 
-  useEffect(() => {
-    if (isAuthenticated && token) {
-      if (websocket.current?.readyState === WebSocket.OPEN) return;
-
-      const wsUrl = `ws://192.168.100.169:8000/ws`;
-      websocket.current = new WebSocket(wsUrl);
-
-      websocket.current.onopen = () => {
-        console.log("Conexão WebSocket aberta. A enviar token para autenticação...");
-        const authMessage = { type: "auth", token: token };
-        websocket.current.send(JSON.stringify(authMessage));
-      };
-
-      websocket.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          console.log("Mensagem recebida do WebSocket:", data);
-          const message = data.message || 'Mensagem desconhecida';
-          const type = data.type || 'info'; // Obtém o tipo da mensagem
-          addNotification(message, type);
-        } catch (e) {
-          addNotification(event.data, 'info');
-        }
-      };
-
-      websocket.current.onclose = (event) => console.log(`Conexão WebSocket fechada: Code ${event.code}`);
-      websocket.current.onerror = (error) => console.error("Erro no WebSocket:", error);
-
-    } else if (websocket.current) {
-      websocket.current.close();
-      websocket.current = null;
+  const processUserData = (userData) => {
+    setUser(userData);
+    if (userData && userData.roles) {
+      // Extrai todas as permissões de todos os planos (roles) e armazena num Set para verificação rápida
+      const userPermissions = new Set(
+        userData.roles.flatMap(role => role.permissions.map(p => p.name))
+      );
+      setPermissions(userPermissions);
+    } else {
+      setPermissions(new Set());
     }
-    return () => {
-      if (websocket.current) websocket.current.close();
-    };
-  }, [isAuthenticated, token]);
+  };
 
   const loadUserFromToken = useCallback(async () => {
     if (token) {
       try {
         const userData = await getMe(token);
-        setUser(userData);
+        processUserData(userData);
         setIsAuthenticated(true);
       } catch (error) {
+        console.error("Falha ao carregar utilizador a partir do token", error);
         localStorage.removeItem('authToken');
-        setToken(null); setUser(null); setIsAuthenticated(false);
+        setToken(null); setUser(null); setPermissions(new Set()); setIsAuthenticated(false);
       }
     }
     setLoading(false);
@@ -79,14 +59,14 @@ export const AuthProvider = ({ children }) => {
     if (data.access_token) {
       localStorage.setItem('authToken', data.access_token);
       setToken(data.access_token);
-      setIsAuthenticated(true);
+      setIsAuthenticated(true); // O useEffect irá tratar de carregar o utilizador e as permissões
     }
   };
 
   const logout = () => {
     if (websocket.current) websocket.current.close();
     localStorage.removeItem('authToken');
-    setToken(null); setUser(null); setIsAuthenticated(false);
+    setToken(null); setUser(null); setPermissions(new Set()); setIsAuthenticated(false);
   };
   
   const refreshUser = useCallback(async () => {
@@ -95,7 +75,7 @@ export const AuthProvider = ({ children }) => {
   }, [loadUserFromToken]);
 
   const value = {
-    token, user, isAuthenticated, loading, login, logout, refreshUser, notifications,
+    token, user, isAuthenticated, loading, login, logout, refreshUser, notifications, permissions, // Adiciona permissões ao contexto
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
