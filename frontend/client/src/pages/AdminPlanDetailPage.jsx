@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getRoleDetails, getPermissions, updateRolePermissions } from '../services/api';
-import './Admin.css'; // Importa um CSS partilhado para as páginas de admin
+import { getRoleDetails, getPermissions, updateRolePermissions, updateRole } from '../services/api';
+import './Admin.css';
 
 const AdminPlanDetailPage = () => {
   const { roleId } = useParams();
   const { token } = useAuth();
   
   const [role, setRole] = useState(null);
+  const [displayName, setDisplayName] = useState('');
+  const [description, setDescription] = useState('');
   const [allPermissions, setAllPermissions] = useState([]);
   const [selectedPermissions, setSelectedPermissions] = useState(new Set());
   
@@ -37,6 +39,8 @@ const AdminPlanDetailPage = () => {
           getPermissions(token)
         ]);
         setRole(roleData);
+        setDisplayName(roleData.display_name);
+        setDescription(roleData.description || '');
         setAllPermissions(permissionsData);
         setSelectedPermissions(new Set(roleData.permissions.map(p => p.id)));
       } catch (err) {
@@ -67,12 +71,16 @@ const AdminPlanDetailPage = () => {
   const handleSaveChanges = async () => {
     try {
       setSaveMessage('');
+      // Atualiza tanto os detalhes do plano como as permissões
+      await updateRole(token, roleId, { display_name: displayName, description: description });
       const permissionIds = Array.from(selectedPermissions);
       await updateRolePermissions(token, roleId, permissionIds);
-      setSaveMessage('Permissões atualizadas com sucesso!');
+      
+      setSaveMessage('Alterações guardadas com sucesso!');
       setTimeout(() => setSaveMessage(''), 4000);
+      fetchData(); // Recarrega os dados para garantir consistência
     } catch (err) {
-      console.error("Erro ao atualizar permissões:", err);
+      console.error("Erro ao guardar alterações:", err);
       setError("Não foi possível guardar as alterações.");
     }
   };
@@ -86,38 +94,68 @@ const AdminPlanDetailPage = () => {
       <Link to="/admin/plans">&larr; Voltar para a Lista de Planos</Link>
       
       <h1 style={{ marginTop: '20px' }}>Gerir Plano: {role.display_name}</h1>
-      <p>Selecione as permissões que este plano deve conceder aos seus utilizadores.</p>
+      
+      <div className="admin-grid">
+        <form onSubmit={(e) => e.preventDefault()} className="admin-form">
+          <h3>Detalhes do Plano</h3>
+          <div className="form-group">
+            <label htmlFor="displayName">Nome de Exibição</label>
+            <input
+              id="displayName"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              disabled={role.name === 'admin_full'}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="description">Descrição</label>
+            <textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              disabled={role.name === 'admin_full'}
+              rows={4}
+            />
+          </div>
+        </form>
 
-      <div className="permissions-grid">
-        {Object.entries(groupedPermissions).map(([groupName, permissions]) => (
-          <div key={groupName} className="permission-group">
-            <h3>{groupName}</h3>
-            {permissions.map(permission => (
-              <div key={permission.id} className="permission-item">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={selectedPermissions.has(permission.id)}
-                    onChange={() => handlePermissionChange(permission.id)}
-                    disabled={role.name === 'admin_full'}
-                  />
-                  <span>{permission.description} (<code>{permission.name}</code>)</span>
-                </label>
+        <div className="admin-form">
+          <h3>Permissões do Plano</h3>
+          <div className="permissions-container">
+            {Object.entries(groupedPermissions).map(([groupName, permissions]) => (
+              <div key={groupName} className="permission-group">
+                <h4>{groupName}</h4>
+                {permissions.map(permission => (
+                  <div key={permission.id} className="permission-item">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={selectedPermissions.has(permission.id)}
+                        onChange={() => handlePermissionChange(permission.id)}
+                        disabled={role.name === 'admin_full'}
+                      />
+                      <span>{permission.description} (<code>{permission.name}</code>)</span>
+                    </label>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
-        ))}
+        </div>
       </div>
 
-      <button 
-        onClick={handleSaveChanges} 
-        disabled={role.name === 'admin_full'}
-        className="save-button"
-      >
-        Guardar Alterações
-      </button>
-      {saveMessage && <p className="success-message">{saveMessage}</p>}
-      {role.name === 'admin_full' && <p className="info-message">O plano de Administrador não pode ser alterado.</p>}
+      <div style={{marginTop: '2rem', textAlign: 'right'}}>
+        <button 
+          onClick={handleSaveChanges} 
+          disabled={role.name === 'admin_full'}
+          className="save-button"
+        >
+          Guardar Todas as Alterações
+        </button>
+        {saveMessage && <p className="success-message">{saveMessage}</p>}
+        {role.name === 'admin_full' && <p className="info-message">O plano de Administrador não pode ser alterado.</p>}
+      </div>
     </div>
   );
 };

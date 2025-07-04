@@ -9,6 +9,7 @@ const BetTrackerPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Estado para o formulário de nova aposta
   const [market, setMarket] = useState('');
   const [selection, setSelection] = useState('');
   const [odds, setOdds] = useState('');
@@ -22,6 +23,7 @@ const BetTrackerPage = () => {
         const betsData = await getUserBets(token);
         setBets(betsData);
       } catch (err) {
+        console.error("Erro ao buscar apostas:", err);
         setError("Não foi possível carregar as suas apostas.");
       } finally {
         setLoading(false);
@@ -29,7 +31,9 @@ const BetTrackerPage = () => {
     }
   }, [token]);
 
-  useEffect(() => { fetchBets(); }, [fetchBets]);
+  useEffect(() => {
+    fetchBets();
+  }, [fetchBets]);
 
   const handleAddBet = async (e) => {
     e.preventDefault();
@@ -39,11 +43,21 @@ const BetTrackerPage = () => {
       return;
     }
     try {
-      const betData = { market_name: market, selection: selection, odds: parseFloat(odds), stake: parseFloat(stake) };
+      const betData = {
+        market_name: market,
+        selection: selection,
+        odds: parseFloat(odds),
+        stake: parseFloat(stake),
+      };
       await createBet(token, betData);
-      setMarket(''); setSelection(''); setOdds(''); setStake('');
+      // Limpa o formulário e atualiza a lista de apostas
+      setMarket('');
+      setSelection('');
+      setOdds('');
+      setStake('');
       fetchBets(); 
     } catch (err) {
+      console.error("Erro ao adicionar aposta:", err);
       setFormError(err.response?.data?.detail || 'Ocorreu um erro ao adicionar a aposta.');
     }
   };
@@ -51,8 +65,10 @@ const BetTrackerPage = () => {
   const handleUpdateStatus = async (betId, newStatus) => {
     try {
       await updateBet(token, betId, newStatus);
-      fetchBets(); // Busca a lista completa para garantir consistência
+      // Em vez de atualizar localmente, busca a lista completa para garantir consistência
+      fetchBets(); 
     } catch (err) {
+      console.error("Erro ao atualizar status da aposta:", err);
       alert("Não foi possível atualizar o status da aposta.");
     }
   };
@@ -62,8 +78,9 @@ const BetTrackerPage = () => {
     if (window.confirm("Tem a certeza de que quer apagar esta aposta? Esta ação não pode ser desfeita.")) {
       try {
         await deleteBet(token, betId);
-        fetchBets();
+        fetchBets(); // Atualiza a lista após apagar
       } catch (err) {
+        console.error("Erro ao apagar aposta:", err);
         alert("Não foi possível apagar a aposta.");
       }
     }
@@ -81,6 +98,7 @@ const BetTrackerPage = () => {
   return (
     <div className="bet-tracker-container">
       <h1>O Meu Registo de Apostas (Bet Tracker)</h1>
+      
       <div className="form-container">
         <h2>Adicionar Nova Aposta</h2>
         <form onSubmit={handleAddBet} className="bet-form">

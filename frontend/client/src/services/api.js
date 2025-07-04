@@ -152,6 +152,19 @@ export const getRoleDetails = async (token, roleId) => {
   return response.data;
 };
 
+export const updateRole = async (token, roleId, roleData) => {
+  const response = await api.put(`/admin/roles/${roleId}`, roleData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const deleteRole = async (token, roleId) => {
+  await api.delete(`/admin/roles/${roleId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+};
+
 export const getPermissions = async (token) => {
   const response = await api.get('/admin/permissions/', {
     headers: { Authorization: `Bearer ${token}` },
@@ -176,6 +189,13 @@ export const getUsers = async (token) => {
   return response.data;
 };
 
+export const getAdminUserDetails = async (token, userId) => {
+  const response = await api.get(`/admin/users/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
 export const updateUserRoles = async (token, userId, roleIds) => {
   const response = await api.put(`/admin/users/${userId}/roles`,
     { role_ids: roleIds },
@@ -184,6 +204,19 @@ export const updateUserRoles = async (token, userId, roleIds) => {
     }
   );
   return response.data;
+};
+
+export const updateUserByAdmin = async (token, userId, userData) => {
+  const response = await api.put(`/admin/users/${userId}`, userData, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const resetPasswordByAdmin = async (token, userId, newPassword) => {
+  await api.post(`/admin/users/${userId}/password-reset`, { new_password: newPassword }, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 };
 
 

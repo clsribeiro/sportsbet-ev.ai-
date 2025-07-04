@@ -35,7 +35,7 @@ const Navbar = () => {
           <>
             <NavLink to="/" style={navLinkStyles}>Dashboard</NavLink>
             <NavLink to="/predictions" style={navLinkStyles}>Dicas da IA</NavLink>
-            <NavLink to="/bets" style={navLinkStyles}>Bet Tracker</NavLink> {/* LINK ADICIONADO */}
+            <NavLink to="/bets" style={navLinkStyles}>Bet Tracker</NavLink>
             
             {user && user.is_superuser && (
               <NavLink to="/admin/users" style={navLinkStyles}>Admin</NavLink>
@@ -73,4 +73,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

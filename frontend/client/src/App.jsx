@@ -30,15 +30,15 @@ function App() {
 
   return (
     <Router>
-      {/* O NotificationContainer fica fora do Routes para ser exibido em todas as páginas */}
       <NotificationContainer />
-      
       <Routes>
+        {/* Rota de Login (fora de qualquer layout) */}
         <Route 
           path="/login" 
           element={isAuthenticated ? <Navigate to="/" /> : <LoginPage />} 
         />
         
+        {/* --- Rotas Principais do Utilizador (dentro do MainLayout) --- */}
         <Route 
           path="/" 
           element={<ProtectedRoute><MainLayout /></ProtectedRoute>}
@@ -50,10 +50,12 @@ function App() {
           <Route path="bets" element={<BetTrackerPage />} />
         </Route>
 
+        {/* --- Rotas de Administração (dentro do AdminLayout) --- */}
         <Route 
           path="/admin" 
           element={<AdminRoute><AdminLayout /></AdminRoute>}
         >
+          {/* Redireciona /admin para /admin/users por defeito */}
           <Route index element={<Navigate to="users" replace />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="users/:userId" element={<AdminUserDetailPage />} />
@@ -61,6 +63,7 @@ function App() {
           <Route path="plans/:roleId" element={<AdminPlanDetailPage />} />
           <Route path="tasks" element={<AdminTasksPage />} />
         </Route>
+        
       </Routes>
     </Router>
   );

@@ -1,37 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getRoles, createRole } from '../services/api'; // Importa a nova função createRole
+import { getRoles, createRole, deleteRole } from '../services/api';
 import { Link } from 'react-router-dom';
+import './Admin.css';
 
 const AdminPlansPage = () => {
   const { token } = useAuth();
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Estado para o formulário de novo plano
   const [newRoleName, setNewRoleName] = useState('');
   const [newRoleDisplayName, setNewRoleDisplayName] = useState('');
   const [formError, setFormError] = useState('');
 
-  const fetchRoles = async () => {
-    try {
-      setLoading(true);
-      const rolesData = await getRoles(token);
-      setRoles(rolesData);
-    } catch (err) {
-      console.error("Erro ao buscar planos:", err);
-      setError("Não foi possível carregar os planos. Verifique se tem permissões de administrador.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
+  const fetchRoles = useCallback(async () => {
     if (token) {
-      fetchRoles();
+      try {
+        setLoading(true);
+        const rolesData = await getRoles(token);
+        setRoles(rolesData);
+      } catch (err) {
+        setError("Não foi possível carregar os planos.");
+      } finally {
+        setLoading(false);
+      }
     }
   }, [token]);
+
+  useEffect(() => {
+    fetchRoles();
+  }, [fetchRoles]);
 
   const handleCreateRole = async (e) => {
     e.preventDefault();
@@ -40,89 +38,89 @@ const AdminPlansPage = () => {
       setFormError('Ambos os nomes (técnico e de exibição) são obrigatórios.');
       return;
     }
-
     try {
       const roleData = {
         name: newRoleName,
         display_name: newRoleDisplayName,
-        description: "Plano criado via painel de admin.", // Descrição padrão
+        description: "Plano criado via painel de admin.",
       };
       await createRole(token, roleData);
-      alert('Plano criado com sucesso!');
-      // Limpa os campos e atualiza a lista
       setNewRoleName('');
       setNewRoleDisplayName('');
       fetchRoles(); 
     } catch (err) {
-      console.error("Erro ao criar plano:", err);
       setFormError(err.response?.data?.detail || 'Ocorreu um erro ao criar o plano.');
     }
   };
 
+  const handleDeleteRole = async (roleId, roleName) => {
+    if (window.confirm(`Tem a certeza de que quer apagar o plano "${roleName}"? Esta ação não pode ser desfeita.`)) {
+      try {
+        await deleteRole(token, roleId);
+        fetchRoles(); // Atualiza a lista após apagar
+      } catch (err) {
+        console.error("Erro ao apagar o plano:", err);
+        alert("Não foi possível apagar o plano.");
+      }
+    }
+  };
+
   if (loading) return <div>A carregar planos...</div>;
-  if (error) return <div style={{ color: 'red' }}>{error}</div>;
+  if (error) return <div className="error-message">{error}</div>;
 
   return (
-    <div style={{ padding: '20px', maxWidth: '900px', margin: 'auto' }}>
-      <Link to="/">&larr; Voltar ao Dashboard</Link>
-      <h1 style={{ marginTop: '20px' }}>Gestão de Planos (Roles)</h1>
-
-      {/* Formulário para Novo Plano */}
-      <div style={{ padding: '15px', border: '1px solid #444', borderRadius: '8px', marginBottom: '30px' }}>
+    <div className="admin-page-container">
+      <h1>Gestão de Planos (Roles)</h1>
+      
+      <div className="admin-form">
         <h2>Criar Novo Plano</h2>
         <form onSubmit={handleCreateRole}>
-          <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="displayName">Nome de Exibição (ex: +EV Starter):</label>
+          <div className="form-group">
+            <label htmlFor="newRoleDisplayName">Nome de Exibição (ex: +EV Starter)</label>
             <input
               type="text"
-              id="displayName"
+              id="newRoleDisplayName"
               value={newRoleDisplayName}
               onChange={(e) => setNewRoleDisplayName(e.target.value)}
-              style={{ width: '100%', padding: '8px', background: '#333', border: '1px solid #555', color: 'white' }}
             />
           </div>
-          <div style={{ marginBottom: '10px' }}>
-            <label htmlFor="technicalName">Nome Técnico (ex: plan_starter):</label>
+          <div className="form-group">
+            <label htmlFor="newRoleName">Nome Técnico (ex: plan_starter)</label>
             <input
               type="text"
-              id="technicalName"
+              id="newRoleName"
               value={newRoleName}
               onChange={(e) => setNewRoleName(e.target.value)}
-              style={{ width: '100%', padding: '8px', background: '#333', border: '1px solid #555', color: 'white' }}
             />
           </div>
-          {formError && <p style={{ color: 'red' }}>{formError}</p>}
-          <button type="submit" style={{ padding: '10px 15px' }}>Criar Plano</button>
+          {formError && <p className="error-message">{formError}</p>}
+          <button type="submit">Criar Plano</button>
         </form>
       </div>
 
       <h2>Planos Existentes</h2>
-      <table style={{ width: '100%', marginTop: '20px', borderCollapse: 'collapse' }}>
+      <table className="admin-table">
         <thead>
-          <tr style={{ borderBottom: '1px solid #444' }}>
-            <th style={{ padding: '8px', textAlign: 'left' }}>ID</th>
-            <th style={{ padding: '8px', textAlign: 'left' }}>Nome de Exibição</th>
-            <th style={{ padding: '8px', textAlign: 'left' }}>Nome Técnico</th>
-            <th style={{ padding: '8px', textAlign: 'left' }}>Status</th>
-            {/* --- NOVA COLUNA --- */}
-            <th style={{ padding: '8px', textAlign: 'center' }}>Ações</th> 
+          <tr>
+            <th>ID</th>
+            <th>Nome de Exibição</th>
+            <th>Nome Técnico</th>
+            <th>Status</th>
+            <th style={{ textAlign: 'center' }}>Ações</th>
           </tr>
         </thead>
         <tbody>
           {roles.map((role) => (
-            <tr key={role.id} style={{ borderBottom: '1px solid #333' }}>
-              <td style={{ padding: '8px' }}>{role.id}</td>
-              <td style={{ padding: '8px' }}>{role.display_name}</td>
-              <td style={{ padding: '8px' }}><code>{role.name}</code></td>
-              <td style={{ padding: '8px' }}>{role.is_active ? 'Ativo' : 'Inativo'}</td>
-              {/* --- NOVA CÉLULA COM O LINK --- */}
-              <td style={{ padding: '8px', textAlign: 'center' }}>
-                <Link 
-                  to={`/admin/plans/${role.id}`}
-                  style={{ textDecoration: 'none', color: '#646cff', fontWeight: 'bold' }}
-                >
-                  Gerir Permissões
-                </Link>
+            <tr key={role.id}>
+              <td>{role.id}</td>
+              <td>{role.display_name}</td>
+              <td><code>{role.name}</code></td>
+              <td>{role.is_active ? 'Ativo' : 'Inativo'}</td>
+              <td className="actions-cell">
+                <Link to={`/admin/plans/${role.id}`} className="action-link edit">Editar / Gerir</Link>
+                {role.name !== 'admin_full' && (
+                  <button onClick={() => handleDeleteRole(role.id, role.display_name)} className="action-button delete">Apagar</button>
+                )}
               </td>
             </tr>
           ))}

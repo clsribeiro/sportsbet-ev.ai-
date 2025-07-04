@@ -10,34 +10,47 @@
   border-collapse: collapse;
   font-size: 0.95em;
 }
-
 .admin-table th, .admin-table td {
   padding: 12px 15px;
   border: 1px solid #333;
   text-align: left;
+  vertical-align: middle;
 }
-
 .admin-table th {
   background-color: #2a2a2a;
   font-weight: bold;
 }
+.admin-table tr:nth-of-type(even) { background-color: #242424; }
+.admin-table tr:hover { background-color: #3a3a3a; }
 
-.admin-table tr:nth-of-type(even) {
-  background-color: #242424;
+.actions-cell {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
 }
-
-.admin-table tr:hover {
-  background-color: #3a3a3a;
-}
-
 .action-link {
   font-weight: bold;
   text-decoration: none;
   color: #818cf8;
+  padding: 6px 12px;
+  border: 1px solid #818cf8;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
 }
 .action-link:hover {
-  text-decoration: underline;
+  background-color: #818cf8;
+  color: #1a1a1a;
 }
+.action-button.delete {
+  background-color: #b71c1c;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.action-button.delete:hover { background-color: #c62828; }
 
 .admin-badge {
   background-color: #e53935;
@@ -46,8 +59,8 @@
   border-radius: 4px;
   font-size: 0.8em;
   margin-left: 8px;
+  vertical-align: middle;
 }
-
 .count-badge {
   background-color: #555;
   color: white;
@@ -55,33 +68,47 @@
   border-radius: 10px;
   font-size: 0.8em;
   margin-left: 8px;
+  vertical-align: middle;
 }
 
-/* Estilos para a página de detalhes do plano */
-.permissions-grid {
-  margin-top: 30px;
+/* Estilos para formulários e páginas de detalhes */
+.admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
+  margin-top: 2rem;
 }
-
-.permission-group h3 {
+.admin-form {
+  background-color: #2a2a2a;
+  padding: 1.5rem 2rem;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+.admin-form h3 {
   margin-top: 0;
-  margin-bottom: 1rem;
-  border-bottom: 2px solid #818cf8;
-  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #555;
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
 }
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+.form-group input[type="text"], .form-group input[type="password"], .form-group textarea {
+  width: 100%;
+  padding: 0.8em;
+  font-size: 1em;
+  background-color: #242424;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: white;
+  box-sizing: border-box;
+}
+.form-group textarea { min-height: 80px; resize: vertical; }
+.checkbox-group label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 
-.permission-item {
-  margin-bottom: 0.75rem;
-}
-
-.permission-item label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-}
+.permissions-container { max-height: 400px; overflow-y: auto; padding-right: 10px; }
+.permission-group h4 { margin-top: 1rem; margin-bottom: 0.5rem; color: #818cf8; }
+.permission-item { margin-bottom: 0.75rem; }
+.permission-item label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 
 .save-button {
   margin-top: 20px;
@@ -91,19 +118,7 @@
   color: white;
   border: none;
 }
-.save-button:disabled {
-  background-color: #555;
-  cursor: not-allowed;
-}
+.save-button:disabled { background-color: #555; cursor: not-allowed; }
 
-.success-message {
-  margin-top: 15px;
-  color: #4caf50;
-  font-weight: bold;
-}
-
-.info-message {
-  font-size: 0.9em;
-  color: #aaa;
-  margin-top: 10px;
-}
+.success-message { margin-top: 15px; color: #4caf50; font-weight: bold; }
+.info-message { font-size: 0.9em; color: #aaa; margin-top: 10px; }
